@@ -1,15 +1,17 @@
 const API_BASE = "http://localhost:5000";
 
 export interface ApiResponse<T = unknown> {
-  status: string;
-  message?: string;
-  data?: T;
+  code: number;
+  message: string;
+  data: T;
+  timestamp: string;
 }
 
 export interface User {
   id: number;
-  name: string;
+  username: string;
   email: string;
+  created_at: string;
 }
 
 async function fetchApi<T>(endpoint: string): Promise<T> {
