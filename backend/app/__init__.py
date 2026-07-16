@@ -29,7 +29,9 @@ def create_app():
         return jwt_payload["jti"] in TOKEN_BLACKLIST
 
     from app.routes.auth import auth_bp
+    from app.routes.projects import projects_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(projects_bp, url_prefix="/api/projects")
 
     @app.route("/")
     def home():
@@ -45,7 +47,7 @@ def create_app():
         return jsonify({"code": 200, "message": "success", "data": {"status": "healthy", "database": "connected" if db_ok else "disconnected"}, "timestamp": datetime.utcnow().isoformat() + "Z"})
 
     with app.app_context():
-        from app.models.user import User  # noqa
+        from app.models import User, Project  # noqa
         db.create_all()
 
     return app
