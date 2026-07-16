@@ -20,7 +20,7 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
 # ---- CORS 配置 ----
-CORS(app, origins=["http://localhost:3000"], supports_credentials=True,
+CORS(app, origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"], supports_credentials=True,
      expose_headers=["Authorization"], allow_headers=["Content-Type", "Authorization"])
 
 # ---- 数据库配置 (SQLite) ----

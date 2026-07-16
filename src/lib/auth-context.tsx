@@ -43,9 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
+        // 恢复 cookie，让 middleware 也能读到
+        document.cookie = `access_token=${savedToken}; path=/; max-age=86400; SameSite=Lax`;
       } catch {
         localStorage.removeItem("access_token");
         localStorage.removeItem("user");
+        document.cookie = "access_token=; path=/; max-age=0";
       }
     }
     setLoading(false);
@@ -64,6 +67,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem("access_token", data.data.access_token);
           localStorage.setItem("refresh_token", data.data.refresh_token);
           localStorage.setItem("user", JSON.stringify(data.data.user));
+          // 同时写入 cookie，让 middleware 能读取
+          document.cookie = `access_token=${data.data.access_token}; path=/; max-age=86400; SameSite=Lax`;
           setToken(data.data.access_token);
           setUser(data.data.user);
           router.push("/");

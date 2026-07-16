@@ -1,0 +1,42 @@
+
+> team-collab-platform@0.1.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+ ⚠ Port 3001 is in use, trying 3002 instead.
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3002
+
+ ✓ Starting...
+ ✓ Ready in 9.3s
+ ○ Compiling / ...
+ ✓ Compiled / in 3.6s (567 modules)
+ GET / 200 in 3940ms
+ ✓ Compiled in 456ms (269 modules)
+ GET / 200 in 4091ms
+ GET / 200 in 154ms
+ GET / 200 in 84ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.4s (538 modules)
+ GET /hybridaction/zybTrackerStatisticsAction?data=%7B%7D&__callback__=__cb__zybTrackerStatisticsAction__e55390b2_c648_4274_ad6e_d9433d88e73b__0 404 in 2661ms
+ GET /hybridaction/zybTrackerStatisticsAction?data=%7B%7D&__callback__=__cb__zybTrackerStatisticsAction__e06c26db_f809_416b_8bdf_85c5b3f7b9c1__1 404 in 2642ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1762ms (313 modules)
+ GET /favicon.ico 200 in 1920ms
+ GET / 200 in 98ms
+ GET /hybridaction/zybTrackerStatisticsAction?data=%7B%7D&__callback__=__cb__zybTrackerStatisticsAction__e70ce6fe_4ed0_4912_aef2_7401afa08b04__0 404 in 38ms
+ GET /hybridaction/zybTrackerStatisticsAction?data=%7B%7D&__callback__=__cb__zybTrackerStatisticsAction__1f27d7bd_e747_4a73_a53c_82ed448e0ef7__1 404 in 31ms
+ GET / 200 in 66ms
+ GET /hybridaction/zybTrackerStatisticsAction?data=%7B%7D&__callback__=__cb__zybTrackerStatisticsAction__67e1312e_d54d_48ca_a7c4_c82da9c8ddd8__0 404 in 26ms
+ GET /hybridaction/zybTrackerStatisticsAction?data=%7B%7D&__callback__=__cb__zybTrackerStatisticsAction__4063c0d2_7673_43f7_9d15_e8ebc92b951d__1 404 in 40ms
+ GET / 200 in 64ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 289ms
+ GET / 200 in 75ms
+ GET / 200 in 22ms
+ GET / 200 in 29ms
+ GET / 200 in 26ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 1151ms (544 modules)
+[?25h
+
+D:\soft\wall\team-collab-platform>
