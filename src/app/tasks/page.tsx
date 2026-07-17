@@ -82,9 +82,12 @@ export default function TasksPage() {
     if (selectedProject) fetchTasks();
   }, [selectedProject, fetchTasks]);
 
+  const [createError, setCreateError] = useState("");
+
   const handleCreate = async () => {
     if (!newTitle.trim() || !selectedProject) return;
     setCreating(true);
+    setCreateError("");
     try {
       const res = await createTask(selectedProject, {
         title: newTitle.trim(),
@@ -99,9 +102,11 @@ export default function TasksPage() {
         setNewDesc("");
         setNewPriority("medium");
         setNewAssignee(undefined);
+      } else {
+        setCreateError(res.message || "创建失败");
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : "创建失败");
+      setCreateError(err instanceof Error ? err.message : "创建失败");
     } finally {
       setCreating(false);
     }
@@ -216,6 +221,7 @@ export default function TasksPage() {
               )}
 
               <div className="flex gap-3 justify-end">
+                {createError && <p className="text-red-400 text-sm flex-1">{createError}</p>}
                 <button onClick={() => setShowCreate(false)} className="btn-secondary text-sm">取消</button>
                 <button onClick={handleCreate} disabled={!newTitle.trim() || creating} className="btn-primary text-sm">
                   {creating ? "创建中..." : "确认创建"}

@@ -73,10 +73,7 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
       ...(options?.headers || {}),
     },
   });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`API Error ${res.status}: ${text || res.statusText}`);
-  }
+  // 返回 JSON，由调用方根据 code 字段判断成功/失败
   return res.json();
 }
 
