@@ -48,7 +48,6 @@ export default function TeamPage() {
     try {
       const res = await getMembers(selectedProject);
       if (res.code === 200) setMembers(res.data || []);
-      else if (res.code === 403) setError("你不是该项目的成员，无权查看成员列表");
       else setError(res.message || "加载失败");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch");
@@ -141,23 +140,17 @@ export default function TeamPage() {
         <div className="mb-6 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] animate-fade-in">
           <div className="flex items-center gap-2 text-sm text-white/50">
             <span className="text-purple-400">🔒</span>
-            {currentUserMember ? (
-              <span>
-                当前身份：
-                <span className="text-white/70 font-medium ml-1">
-                  {ROLE_MAP[currentUserMember.role]?.label || "成员"}
-                </span>
-                {canManage ? (
-                  <span className="ml-2 text-emerald-400/80">拥有添加/移除成员和修改角色权限</span>
-                ) : (
-                  <span className="ml-2 text-white/30">仅可查看成员列表</span>
-                )}
+            <span>
+              当前身份：
+              <span className="text-white/70 font-medium ml-1">
+                {ROLE_MAP[currentUserMember?.role]?.label || "成员"}
               </span>
-            ) : (
-              <span className="text-amber-400/80">
-                你尚未加入当前项目。只有项目成员才能查看成员列表。请联系项目管理员将你添加进来。
-              </span>
-            )}
+              {canManage ? (
+                <span className="ml-2 text-emerald-400/80">拥有添加/移除成员和修改角色权限</span>
+              ) : (
+                <span className="ml-2 text-white/30">仅可查看成员列表</span>
+              )}
+            </span>
           </div>
         </div>
 

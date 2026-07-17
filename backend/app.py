@@ -319,7 +319,9 @@ def projects():
     user_id = int(get_jwt_identity())
 
     if request.method == "GET":
-        projects_list = Project.query.order_by(Project.updated_at.desc()).all()
+        # 只返回当前用户参与的项目
+        member_project_ids = [m.project_id for m in TeamMember.query.filter_by(user_id=user_id).all()]
+        projects_list = Project.query.filter(Project.id.in_(member_project_ids)).order_by(Project.updated_at.desc()).all() if member_project_ids else []
         return ok([p.to_dict() for p in projects_list])
 
     elif request.method == "POST":
@@ -527,10 +529,7 @@ def project_members(project_id):
         return fail("项目不存在", 404)
 
     if request.method == "GET":
-        # 权限检查：只有项目成员才能查看成员列表
-        current_member = TeamMember.query.filter_by(user_id=user_id, project_id=project_id).first()
-        if not current_member:
-            return fail("你不是该项目的成员，无权查看", 403)
+        # 成员列表公开可见（类似 GitHub 的 Contributors）
         members = TeamMember.query.filter_by(project_id=project_id).all()
         return ok([m.to_dict() for m in members])
 
