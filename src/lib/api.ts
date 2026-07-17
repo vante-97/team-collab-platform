@@ -237,3 +237,77 @@ export async function removeMember(memberId: number): Promise<ApiResponse<null>>
     method: "DELETE",
   });
 }
+
+// ---- 文件管理 API ----
+export interface ProjectFile {
+  id: number;
+  filename: string;
+  original_name: string;
+  file_size: number;
+  file_type: string;
+  uploader_id: number;
+  uploader_name: string;
+  project_id: number;
+  created_at: string;
+}
+
+export async function getProjectFiles(projectId: number): Promise<ApiResponse<ProjectFile[]>> {
+  return fetchApi<ApiResponse<ProjectFile[]>>(`/api/projects/${projectId}/files`);
+}
+
+export async function uploadFile(projectId: number, file: File): Promise<ApiResponse<ProjectFile>> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${API_BASE}/api/projects/${projectId}/files`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+    body: formData,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Upload Error ${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
+export async function deleteFile(fileId: number): Promise<ApiResponse<null>> {
+  return fetchApi<ApiResponse<null>>(`/api/files/${fileId}`, {
+    method: "DELETE",
+  });
+}
+
+export function getFileDownloadUrl(fileId: number): string {
+  const token = getToken();
+  return `${API_BASE}/api/files/${fileId}/download?token=${token || ""}`;
+}
+
+// ---- 数据统计 API ----
+export interface StatsData {
+  overview: {
+    projects: number;
+    tasks: number;
+    users: number;
+    files: number;
+    members: number;
+  };
+  tasks: {
+    todo: number;
+    in_progress: number;
+    done: number;
+  };
+  projects_status: {
+    planning: number;
+    active: number;
+    completed: number;
+  };
+  priority: {
+    low: number;
+    medium: number;
+    high: number;
+    urgent: number;
+  };
+}
+
+export async function getStats(): Promise<ApiResponse<StatsData>> {
+  return fetchApi<ApiResponse<StatsData>>("/api/stats");
+}

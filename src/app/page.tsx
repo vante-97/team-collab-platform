@@ -11,6 +11,8 @@ const features = [
   { icon: "📋", title: "项目管理", desc: "创建和管理团队项目", href: "/projects", color: "from-purple-500/20 to-violet-500/20" },
   { icon: "📌", title: "任务看板", desc: "看板式任务跟踪管理", href: "/tasks", color: "from-blue-500/20 to-cyan-500/20" },
   { icon: "👥", title: "团队协作", desc: "邀请成员，分配角色权限", href: "/team", color: "from-emerald-500/20 to-teal-500/20" },
+  { icon: "📂", title: "文件管理", desc: "上传、预览项目文件", href: "/files", color: "from-orange-500/20 to-amber-500/20" },
+  { icon: "📊", title: "数据统计", desc: "团队效率可视化分析", href: "/stats", color: "from-pink-500/20 to-rose-500/20" },
 ];
 
 export default function Home() {
@@ -57,7 +59,7 @@ export default function Home() {
 
         {/* Feature Cards */}
         {isAuthenticated && (
-          <div className="grid gap-5 md:grid-cols-3 mb-12 animate-slide-up">
+          <div className="grid gap-5 md:grid-cols-3 lg:grid-cols-5 mb-12 animate-slide-up">
             {features.map((f, i) => (
               <Link
                 key={f.title}

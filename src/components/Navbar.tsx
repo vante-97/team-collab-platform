@@ -9,6 +9,8 @@ const navLinks = [
   { href: "/projects", label: "项目", icon: "◆" },
   { href: "/tasks", label: "任务", icon: "◫" },
   { href: "/team", label: "团队", icon: "◎" },
+  { href: "/files", label: "文件", icon: "◰" },
+  { href: "/stats", label: "统计", icon: "⬡" },
 ];
 
 export default function Navbar() {

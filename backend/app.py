@@ -115,6 +115,34 @@ class Task(db.Model):
         }
 
 
+# ---- 文件模型 ----
+class ProjectFile(db.Model):
+    __tablename__ = "project_files"
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(500), nullable=False)
+    original_name = db.Column(db.String(500), nullable=False)
+    file_size = db.Column(db.Integer, default=0)  # 字节
+    file_type = db.Column(db.String(50), default="")  # pdf, image, doc, other
+    uploader_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey("projects.id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    uploader = db.relationship("User", backref="files", lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "filename": self.filename,
+            "original_name": self.original_name,
+            "file_size": self.file_size,
+            "file_type": self.file_type,
+            "uploader_id": self.uploader_id,
+            "uploader_name": self.uploader.username if self.uploader else None,
+            "project_id": self.project_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
 # ---- 团队成员模型 ----
 class TeamMember(db.Model):
     __tablename__ = "team_members"
@@ -489,6 +517,153 @@ def member_detail(member_id):
         db.session.delete(member)
         db.session.commit()
         return ok(None, "成员已移除")
+
+
+# ---- 文件上传目录 ----
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+def get_file_type(ext):
+    ext = ext.lower()
+    if ext in (".pdf",):
+        return "pdf"
+    if ext in (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp"):
+        return "image"
+    if ext in (".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"):
+        return "doc"
+    if ext in (".txt", ".md", ".json", ".xml", ".csv", ".log"):
+        return "text"
+    return "other"
+
+
+# ============ 文件管理 API ============
+@app.route("/api/projects/<int:project_id>/files", methods=["GET", "POST"])
+@jwt_required()
+def project_files(project_id):
+    user_id = int(get_jwt_identity())
+    proj = Project.query.get(project_id)
+    if not proj:
+        return fail("项目不存在", 404)
+
+    if request.method == "GET":
+        files = ProjectFile.query.filter_by(project_id=project_id)\
+            .order_by(ProjectFile.created_at.desc()).all()
+        return ok([f.to_dict() for f in files])
+
+    elif request.method == "POST":
+        if "file" not in request.files:
+            return fail("请选择要上传的文件", 400)
+        file = request.files["file"]
+        if not file.filename:
+            return fail("请选择要上传的文件", 400)
+
+        original_name = file.filename
+        ext = os.path.splitext(original_name)[1].lower()
+        # 生成唯一文件名
+        unique_name = f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}_{user_id}{ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_name)
+
+        file.save(file_path)
+        file_size = os.path.getsize(file_path)
+        file_type = get_file_type(ext)
+
+        pf = ProjectFile(
+            filename=unique_name,
+            original_name=original_name,
+            file_size=file_size,
+            file_type=file_type,
+            uploader_id=user_id,
+            project_id=project_id,
+        )
+        db.session.add(pf)
+        db.session.commit()
+        return ok(pf.to_dict(), "文件上传成功", 201)
+
+
+@app.route("/api/files/<int:file_id>", methods=["GET", "DELETE"])
+@jwt_required()
+def file_detail(file_id):
+    pf = ProjectFile.query.get(file_id)
+    if not pf:
+        return fail("文件不存在", 404)
+
+    if request.method == "GET":
+        return ok(pf.to_dict())
+
+    elif request.method == "DELETE":
+        # 删除物理文件
+        file_path = os.path.join(UPLOAD_DIR, pf.filename)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        db.session.delete(pf)
+        db.session.commit()
+        return ok(None, "文件已删除")
+
+
+@app.route("/api/files/<int:file_id>/download", methods=["GET"])
+@jwt_required()
+def download_file(file_id):
+    """下载/预览文件"""
+    pf = ProjectFile.query.get(file_id)
+    if not pf:
+        return fail("文件不存在", 404)
+    file_path = os.path.join(UPLOAD_DIR, pf.filename)
+    if not os.path.exists(file_path):
+        return fail("文件已被删除", 404)
+
+    from flask import send_file
+    return send_file(file_path, download_name=pf.original_name, as_attachment=False)
+
+
+# ---- 数据统计 API ----
+@app.route("/api/stats", methods=["GET"])
+@jwt_required()
+def get_stats():
+    """获取全局统计数据"""
+    total_projects = Project.query.count()
+    total_tasks = Task.query.count()
+    total_users = User.query.count()
+    total_files = ProjectFile.query.count()
+
+    # 任务状态分布
+    todo_count = Task.query.filter_by(status="todo").count()
+    in_progress_count = Task.query.filter_by(status="in_progress").count()
+    done_count = Task.query.filter_by(status="done").count()
+
+    # 项目状态分布
+    planning_count = Project.query.filter_by(status="planning").count()
+    active_count = Project.query.filter_by(status="active").count()
+    completed_count = Project.query.filter_by(status="completed").count()
+
+    # 成员分布
+    total_members = TeamMember.query.count()
+
+    # 按优先级统计任务
+    priority_stats = {}
+    for p in ["low", "medium", "high", "urgent"]:
+        priority_stats[p] = Task.query.filter_by(priority=p).count()
+
+    return ok({
+        "overview": {
+            "projects": total_projects,
+            "tasks": total_tasks,
+            "users": total_users,
+            "files": total_files,
+            "members": total_members,
+        },
+        "tasks": {
+            "todo": todo_count,
+            "in_progress": in_progress_count,
+            "done": done_count,
+        },
+        "projects_status": {
+            "planning": planning_count,
+            "active": active_count,
+            "completed": completed_count,
+        },
+        "priority": priority_stats,
+    })
 
 
 if __name__ == "__main__":
