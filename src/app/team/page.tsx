@@ -44,9 +44,11 @@ export default function TeamPage() {
     if (!selectedProject) return;
     setLoading(true);
     setError("");
+    setMembers([]);
     try {
       const res = await getMembers(selectedProject);
       if (res.code === 200) setMembers(res.data || []);
+      else if (res.code === 403) setError("你不是该项目的成员，无权查看成员列表");
       else setError(res.message || "加载失败");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch");
@@ -152,7 +154,9 @@ export default function TeamPage() {
                 )}
               </span>
             ) : (
-              <span>你尚未加入当前项目，无法查看成员操作</span>
+              <span className="text-amber-400/80">
+                你尚未加入当前项目。只有项目成员才能查看成员列表。请联系项目管理员将你添加进来。
+              </span>
             )}
           </div>
         </div>

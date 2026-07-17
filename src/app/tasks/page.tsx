@@ -65,9 +65,11 @@ export default function TasksPage() {
     if (!selectedProject) return;
     setLoading(true);
     setError("");
+    setTasks([]);
     try {
       const res = await getTasks(selectedProject);
       if (res.code === 200) setTasks(res.data || []);
+      else if (res.code === 403) setError("你不是该项目的成员，无权查看任务");
       else setError(res.message || "加载失败");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch");

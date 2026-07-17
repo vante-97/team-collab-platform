@@ -31,6 +31,7 @@ export default function FilesPage() {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [msgType, setMsgType] = useState<"success" | "error">("success");
+  const [accessDenied, setAccessDenied] = useState(false);
 
   const showMsg = (type: "success" | "error", text: string) => {
     setMsgType(type);
@@ -54,9 +55,15 @@ export default function FilesPage() {
 
   const loadFiles = useCallback(async () => {
     if (!selectedProject) return;
+    setAccessDenied(false);
     try {
       const res = await getProjectFiles(selectedProject);
-      setFiles(res.data || []);
+      if (res.code === 403) {
+        setAccessDenied(true);
+        setFiles([]);
+      } else {
+        setFiles(res.data || []);
+      }
     } catch {
       // ignore
     }
@@ -135,6 +142,7 @@ export default function FilesPage() {
         </div>
 
         {/* Stats Mini */}
+        {!accessDenied && (
         <div className="glass-card p-4 mb-6 flex gap-6 animate-slide-up">
           <div className="text-center flex-1">
             <div className="text-white/25 text-[11px]">文件总数</div>
@@ -149,6 +157,7 @@ export default function FilesPage() {
             <div className="text-white font-semibold text-lg">{user?.username}</div>
           </div>
         </div>
+        )}
 
         {/* Message */}
         {message && (
@@ -159,8 +168,17 @@ export default function FilesPage() {
           }`}>{message}</div>
         )}
 
+        {/* Access Denied */}
+        {accessDenied && (
+          <div className="glass-card p-12 text-center animate-slide-up">
+            <div className="empty-state-icon">🔒</div>
+            <div className="empty-state-title">无权访问</div>
+            <div className="empty-state-desc">你不是该项目的成员，无法查看或上传文件。请联系项目管理员将你添加进来。</div>
+          </div>
+        )}
+
         {/* File List */}
-        {files.length === 0 ? (
+        {!accessDenied && (files.length === 0 ? (
           <div className="glass-card p-12 text-center animate-slide-up">
             <div className="empty-state-icon">📂</div>
             <div className="empty-state-title">暂无文件</div>
@@ -218,7 +236,7 @@ export default function FilesPage() {
               </div>
             ))}
           </div>
-        )}
+        ))}
       </div>
     </div>
   );

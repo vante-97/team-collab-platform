@@ -431,9 +431,15 @@ def init_db():
 @app.route("/api/projects/<int:project_id>/tasks", methods=["GET", "POST"])
 @jwt_required()
 def project_tasks(project_id):
+    user_id = int(get_jwt_identity())
     proj = Project.query.get(project_id)
     if not proj:
         return fail("项目不存在", 404)
+
+    # 权限检查：只有项目成员才能查看/创建任务
+    current_member = TeamMember.query.filter_by(user_id=user_id, project_id=project_id).first()
+    if not current_member:
+        return fail("你不是该项目的成员，无权操作", 403)
 
     if request.method == "GET":
         tasks = Task.query.filter_by(project_id=project_id).order_by(Task.updated_at.desc()).all()
@@ -521,10 +527,19 @@ def project_members(project_id):
         return fail("项目不存在", 404)
 
     if request.method == "GET":
+        # 权限检查：只有项目成员才能查看成员列表
+        current_member = TeamMember.query.filter_by(user_id=user_id, project_id=project_id).first()
+        if not current_member:
+            return fail("你不是该项目的成员，无权查看", 403)
         members = TeamMember.query.filter_by(project_id=project_id).all()
         return ok([m.to_dict() for m in members])
 
     elif request.method == "POST":
+        # 权限检查：只有 owner 或 admin 才能添加成员
+        current_member = TeamMember.query.filter_by(user_id=user_id, project_id=project_id).first()
+        if not current_member or current_member.role not in ("owner", "admin"):
+            return fail("你没有权限添加成员", 403)
+
         data = request.get_json(silent=True) or {}
         member_username = data.get("username", "").strip()
         role = data.get("role", "member")
@@ -553,9 +568,15 @@ def project_members(project_id):
 @app.route("/api/members/<int:member_id>", methods=["PUT", "DELETE"])
 @jwt_required()
 def member_detail(member_id):
+    user_id = int(get_jwt_identity())
     member = TeamMember.query.get(member_id)
     if not member:
         return fail("成员不存在", 404)
+
+    # 权限检查：只有项目 owner/admin 才能修改/移除成员
+    current_member = TeamMember.query.filter_by(user_id=user_id, project_id=member.project_id).first()
+    if not current_member or current_member.role not in ("owner", "admin"):
+        return fail("你没有权限执行此操作", 403)
 
     if request.method == "PUT":
         data = request.get_json(silent=True) or {}
@@ -598,6 +619,11 @@ def project_files(project_id):
     proj = Project.query.get(project_id)
     if not proj:
         return fail("项目不存在", 404)
+
+    # 权限检查：只有项目成员才能查看/上传文件
+    current_member = TeamMember.query.filter_by(user_id=user_id, project_id=project_id).first()
+    if not current_member:
+        return fail("你不是该项目的成员，无权操作", 403)
 
     if request.method == "GET":
         files = ProjectFile.query.filter_by(project_id=project_id)\
