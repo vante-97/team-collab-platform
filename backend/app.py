@@ -16,8 +16,10 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 
 # ---- 密钥配置 ----
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "team-collab-secret-key-change-in-production")
-app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "jwt-secret-key-change-in-production")
+# 安全：生产环境必须通过环境变量设置，本地开发使用自动生成的随机密钥
+import secrets
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY") or secrets.token_hex(32)
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
@@ -893,5 +895,6 @@ def get_stats():
 
 if __name__ == "__main__":
     init_db()
-    print("[Server] 后端启动: http://localhost:5000")
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    debug_mode = os.environ.get("FLASK_DEBUG", "true").lower() == "true"
+    print(f"[Server] 后端启动: http://localhost:5000 (debug={debug_mode})")
+    app.run(debug=debug_mode, host="0.0.0.0", port=5000)
