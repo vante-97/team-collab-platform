@@ -210,12 +210,19 @@ export async function getMembers(projectId: number): Promise<ApiResponse<TeamMem
 export async function addMember(
   projectId: number,
   data: { username: string; role?: string }
-): Promise<ApiResponse<TeamMember>> {
-  return fetchApi<ApiResponse<TeamMember>>(`/api/projects/${projectId}/members`, {
+): Promise<ApiResponse<Invitation>> {
+  return fetchApi<ApiResponse<Invitation>>(`/api/projects/${projectId}/members`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+}
+
+export async function inviteMember(
+  projectId: number,
+  data: { username: string; role?: string }
+): Promise<ApiResponse<Invitation>> {
+  return addMember(projectId, data);
 }
 
 export async function updateMemberRole(

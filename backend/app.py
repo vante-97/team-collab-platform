@@ -362,6 +362,12 @@ def projects():
         name = data.get("name", "").strip()
         if not name:
             return fail("项目名称不能为空", 400)
+
+        # 确保 JWT 中的用户真实存在，防止删库后旧 token 继续创建脏数据
+        current_user = User.query.get(user_id)
+        if not current_user:
+            return fail("登录状态已失效，请重新登录", 401)
+
         proj = Project(
             name=name,
             description=data.get("description", "").strip(),

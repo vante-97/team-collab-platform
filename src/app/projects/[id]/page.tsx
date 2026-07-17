@@ -6,9 +6,9 @@ import { useRequireAuth, useAuth } from "@/lib/auth-context";
 import {
   getProjectById, updateProject, deleteProject,
   getTasks, createTask, moveTask, deleteTask,
-  getMembers, addMember, removeMember,
+  getMembers, inviteMember, removeMember,
   getProjectFiles, uploadFile, deleteFile, getFileDownloadUrl,
-  type Project, type Task, type TeamMember, type ProjectFile,
+  type Project, type Task, type TeamMember, type ProjectFile, type Invitation,
 } from "@/lib/api";
 import Link from "next/link";
 
@@ -68,10 +68,13 @@ export default function ProjectDetailPage() {
 
   // Members state
   const [members, setMembers] = useState<TeamMember[]>([]);
-  const [showAddMember, setShowAddMember] = useState(false);
+  const [sentInvitations, setSentInvitations] = useState<Invitation[]>([]);
+  const [showInviteMember, setShowInviteMember] = useState(false);
   const [newMemberName, setNewMemberName] = useState("");
-  const [addMemberError, setAddMemberError] = useState("");
-  const [addingMember, setAddingMember] = useState(false);
+  const [newMemberRole, setNewMemberRole] = useState("member");
+  const [inviteMemberError, setInviteMemberError] = useState("");
+  const [invitingMember, setInvitingMember] = useState(false);
+  const [inviteMemberSuccess, setInviteMemberSuccess] = useState("");
 
   // Files state
   const [files, setFiles] = useState<ProjectFile[]>([]);
@@ -211,25 +214,30 @@ export default function ProjectDetailPage() {
     }
   };
 
-  // Handle add member
-  const handleAddMember = async () => {
+  // Handle invite member
+  const handleInviteMember = async () => {
     if (!newMemberName.trim()) return;
-    setAddingMember(true);
-    setAddMemberError("");
+    setInvitingMember(true);
+    setInviteMemberError("");
+    setInviteMemberSuccess("");
     try {
-      const res = await addMember(projectId, { username: newMemberName.trim() });
+      const res = await inviteMember(projectId, { username: newMemberName.trim(), role: newMemberRole });
       if (res.code === 201 || res.code === 200) {
-        setMembers((prev) => [...prev, res.data]);
-        setShowAddMember(false);
-        setNewMemberName("");
-        showToast("success", "成员已添加");
+        setSentInvitations((prev) => [...prev, res.data]);
+        setInviteMemberSuccess("邀请已发送，等待对方确认");
+        setTimeout(() => {
+          setShowInviteMember(false);
+          setNewMemberName("");
+          setNewMemberRole("member");
+          setInviteMemberSuccess("");
+        }, 1500);
       } else {
-        setAddMemberError(res.message || "添加失败");
+        setInviteMemberError(res.message || "邀请发送失败");
       }
     } catch (err) {
-      setAddMemberError(err instanceof Error ? err.message : "添加失败");
+      setInviteMemberError(err instanceof Error ? err.message : "邀请发送失败");
     } finally {
-      setAddingMember(false);
+      setInvitingMember(false);
     }
   };
 
@@ -561,21 +569,53 @@ export default function ProjectDetailPage() {
               <div className="flex items-center justify-between mb-4">
                 <p className="text-white/25 text-sm">共 {members.length} 位成员</p>
                 {canManage && (
-                  <button onClick={() => { setShowAddMember(true); setAddMemberError(""); }} className="btn-primary text-sm">+ 添加成员</button>
+                  <button onClick={() => { setShowInviteMember(true); setInviteMemberError(""); setInviteMemberSuccess(""); }} className="btn-primary text-sm whitespace-nowrap flex-shrink-0 min-w-fit">+ 邀请成员</button>
                 )}
               </div>
-              {showAddMember && (
-                <div className="modal-overlay" onClick={() => setShowAddMember(false)}>
+              {showInviteMember && (
+                <div className="modal-overlay" onClick={() => setShowInviteMember(false)}>
                   <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                    <h2 className="text-lg font-semibold text-white mb-4">添加团队成员</h2>
-                    {addMemberError && <div className="mb-3 p-3 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-sm">{addMemberError}</div>}
-                    <input type="text" placeholder="输入用户名" value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} className="glass-input mb-4" autoFocus />
+                    <h2 className="text-lg font-semibold text-white mb-2">邀请团队成员</h2>
+                    <p className="text-white/30 text-xs mb-4">输入用户名发送邀请，对方在收件箱中确认后即可加入项目</p>
+                    {inviteMemberError && <div className="mb-3 p-3 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-sm">{inviteMemberError}</div>}
+                    {inviteMemberSuccess && <div className="mb-3 p-3 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-emerald-400 text-sm">{inviteMemberSuccess}</div>}
+                    <input type="text" placeholder="输入用户名" value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} className="glass-input mb-3" autoFocus />
+                    <div className="mb-5">
+                      <label className="block text-white/40 text-sm mb-2">角色</label>
+                      <div className="flex gap-2">
+                        {["admin", "member", "viewer"].map((r) => {
+                          const ri = ROLE_MAP[r];
+                          return (
+                            <button key={r} type="button" onClick={() => setNewMemberRole(r)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${ri.color} ${newMemberRole === r ? "ring-2 ring-purple-500/40" : "opacity-50 hover:opacity-80"}`}>
+                              {ri.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                     <div className="flex gap-3 justify-end">
-                      <button onClick={() => setShowAddMember(false)} className="btn-secondary text-sm">取消</button>
-                      <button onClick={handleAddMember} disabled={!newMemberName.trim() || addingMember} className="btn-primary text-sm">
-                        {addingMember ? "添加中..." : "确认添加"}
+                      <button onClick={() => setShowInviteMember(false)} className="btn-secondary text-sm">取消</button>
+                      <button onClick={handleInviteMember} disabled={!newMemberName.trim() || invitingMember} className="btn-primary text-sm">
+                        {invitingMember ? "发送中..." : "发送邀请"}
                       </button>
                     </div>
+                  </div>
+                </div>
+              )}
+              {sentInvitations.length > 0 && (
+                <div className="mb-6">
+                  <p className="text-white/30 text-xs mb-2">已发送邀请</p>
+                  <div className="glass-card divide-y divide-white/[0.03] overflow-hidden">
+                    {sentInvitations.map((inv) => (
+                      <div key={inv.id} className="flex items-center justify-between px-4 py-3">
+                        <div className="text-sm text-white/70">
+                          <span className="font-medium">{inv.invitee_name}</span>
+                          <span className="text-white/30 ml-2">{ROLE_MAP[inv.role]?.label || inv.role}</span>
+                        </div>
+                        <span className="text-xs text-yellow-400/80 bg-yellow-400/10 px-2 py-1 rounded-full">等待确认</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -583,7 +623,10 @@ export default function ProjectDetailPage() {
                 <div className="empty-state">
                   <div className="empty-state-icon">👥</div>
                   <div className="empty-state-title">暂无成员</div>
-                  <div className="empty-state-desc">添加成员开始协作</div>
+                  <div className="empty-state-desc">邀请成员开始协作</div>
+                  {canManage && (
+                    <button onClick={() => { setShowInviteMember(true); setInviteMemberError(""); setInviteMemberSuccess(""); }} className="btn-primary text-sm">邀请第一个成员</button>
+                  )}
                 </div>
               ) : (
                 <div className="glass-card divide-y divide-white/[0.03] overflow-hidden">
