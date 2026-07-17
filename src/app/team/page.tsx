@@ -130,12 +130,12 @@ export default function TeamPage() {
     <div className="page-bg">
       <div className="max-w-4xl mx-auto px-6 py-10">
         {/* Header */}
-        <div className="page-header animate-fade-in flex-nowrap">
+        <div className="page-header animate-fade-in !flex-nowrap">
           <div className="shrink-0">
             <h1 className="page-title">团队协作</h1>
             <p className="page-subtitle">管理项目成员与权限</p>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3 shrink-0 min-w-0">
             <select
               value={selectedProject ?? ""}
               onChange={(e) => setSelectedProject(Number(e.target.value))}
@@ -148,7 +148,7 @@ export default function TeamPage() {
             {canManage && (
               <button
                 onClick={() => { setShowInvite(true); setInviteError(""); setInviteSuccess(""); }}
-                className="btn-primary text-sm whitespace-nowrap flex-shrink-0"
+                className="btn-primary text-sm whitespace-nowrap flex-shrink-0 min-w-fit"
               >
                 + 邀请成员
               </button>
