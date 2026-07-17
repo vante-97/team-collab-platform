@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /** 后端统一返回格式：{ code, data, message, timestamp } */
 export interface ApiResponse<T = unknown> {
@@ -277,8 +277,7 @@ export async function deleteFile(fileId: number): Promise<ApiResponse<null>> {
 }
 
 export function getFileDownloadUrl(fileId: number): string {
-  const token = getToken();
-  return `${API_BASE}/api/files/${fileId}/download?token=${token || ""}`;
+  return `${API_BASE}/api/files/${fileId}/download`;
 }
 
 // ---- 数据统计 API ----

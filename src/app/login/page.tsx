@@ -55,7 +55,7 @@ export default function LoginPage() {
           )}
 
           <div className="mb-4">
-            <label className="block text-white/50 text-sm mb-2">用户名或邮箱</label>
+            <label className="block text-white/40 text-sm mb-2">用户名或邮箱</label>
             <input
               type="text"
               value={username}
@@ -68,7 +68,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-white/50 text-sm mb-2">密码</label>
+            <label className="block text-white/40 text-sm mb-2">密码</label>
             <input
               type="password"
               value={password}
@@ -83,7 +83,7 @@ export default function LoginPage() {
             {loading ? "登录中..." : "登录"}
           </button>
 
-          <p className="text-center text-white/25 text-sm mt-5">
+          <p className="text-center text-white/20 text-sm mt-5">
             还没有账号？{" "}
             <Link href="/register" className="text-purple-400 hover:text-purple-300 transition-colors">
               立即注册
@@ -91,7 +91,7 @@ export default function LoginPage() {
           </p>
 
           <div className="mt-6 pt-5 border-t border-white/[0.06]">
-            <p className="text-white/20 text-xs text-center mb-2">测试账号</p>
+            <p className="text-white/15 text-xs text-center mb-2">测试账号</p>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { u: "testuser1", p: "123456" },
@@ -101,7 +101,7 @@ export default function LoginPage() {
                   key={acc.u}
                   type="button"
                   onClick={() => { setUsername(acc.u); setPassword(acc.p); }}
-                  className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.04] text-white/30 text-xs hover:text-white/60 hover:border-white/10 transition-all text-center"
+                  className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.04] text-white/25 text-xs hover:text-white/55 hover:border-white/10 transition-all text-center"
                 >
                   {acc.u}
                 </button>

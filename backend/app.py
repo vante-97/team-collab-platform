@@ -1,5 +1,7 @@
-"""Team Collab Platform - Flask Backend"""
+"""Team Collab Platform - Flask Backend v2"""
 import os
+import time
+from functools import wraps
 from datetime import datetime, timezone, timedelta
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -23,10 +25,32 @@ app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 CORS(app, origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"], supports_credentials=True,
      expose_headers=["Authorization"], allow_headers=["Content-Type", "Authorization"])
 
+# ---- 简易速率限制 ----
+RATE_LIMIT_STORE: dict[str, list[float]] = {}
+
+def rate_limit(max_requests: int = 20, window_seconds: int = 60):
+    """简易速率限制装饰器：每 window_seconds 秒最多 max_requests 次请求"""
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            key = f"rate_{request.remote_addr}_{f.__name__}"
+            now = time.time()
+            if key not in RATE_LIMIT_STORE:
+                RATE_LIMIT_STORE[key] = []
+            # 清理过期记录
+            RATE_LIMIT_STORE[key] = [t for t in RATE_LIMIT_STORE[key] if now - t < window_seconds]
+            if len(RATE_LIMIT_STORE[key]) >= max_requests:
+                return fail("请求过于频繁，请稍后再试", 429)
+            RATE_LIMIT_STORE[key].append(now)
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
 # ---- 数据库配置 (SQLite) ----
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(BASE_DIR, 'data.db')}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 最大上传 50MB
 
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
@@ -209,6 +233,7 @@ def health_check():
 
 # ---- 认证路由 ----
 @app.route("/api/auth/register", methods=["POST"])
+@rate_limit(max_requests=5, window_seconds=60)
 def register():
     data = request.get_json(silent=True) or {}
     username = data.get("username", "").strip()
@@ -234,6 +259,7 @@ def register():
 
 
 @app.route("/api/auth/login", methods=["POST"])
+@rate_limit(max_requests=10, window_seconds=60)
 def login():
     data = request.get_json(silent=True) or {}
     username = data.get("username", "").strip()
@@ -360,18 +386,45 @@ def init_db():
             db.session.commit()
             print("[DB] 示例用户已插入 (testuser1, testuser2, admin)")
         # 插入示例项目
+        projects_data = []
         if Project.query.count() == 0:
             owner = User.query.filter_by(username="testuser1").first()
-            db.session.add_all([
-                Project(name="测试例熬夜项目", description="这是一个测试项目，用于验证前后端连通性",
+            projects_data = [
+                Project(name="测试样例项目", description="这是一个测试项目，用于验证前后端连通性",
                         status="active", owner_id=owner.id if owner else None),
                 Project(name="前端重构", description="使用 Next.js 14 重构前端页面",
                         status="planning", owner_id=owner.id if owner else None),
                 Project(name="API 文档编写", description="编写完整的 REST API 文档",
                         status="completed", owner_id=owner.id if owner else None),
-            ])
+            ]
+            db.session.add_all(projects_data)
             db.session.commit()
             print("[DB] 示例项目已插入。")
+
+        # 确保示例项目存在示例成员关系，方便演示完整管理功能
+        owner = User.query.filter_by(username="testuser1").first()
+        admin = User.query.filter_by(username="admin").first()
+        member = User.query.filter_by(username="testuser2").first()
+        if not projects_data:
+            projects_data = Project.query.all()
+        for proj in projects_data:
+            existing_user_ids = {m.user_id for m in TeamMember.query.filter_by(project_id=proj.id).all()}
+            memberships = []
+            if owner and owner.id not in existing_user_ids:
+                memberships.append(TeamMember(user_id=owner.id, project_id=proj.id, role="owner"))
+            if admin and admin.id not in existing_user_ids:
+                memberships.append(TeamMember(user_id=admin.id, project_id=proj.id, role="admin"))
+            if member and member.id not in existing_user_ids:
+                memberships.append(TeamMember(user_id=member.id, project_id=proj.id, role="member"))
+            if memberships:
+                db.session.add_all(memberships)
+        db.session.commit()
+        print("[DB] 示例成员关系已同步。")
+
+
+
+
+
 
 
 # ============ 任务管理 API ============
@@ -602,9 +655,27 @@ def file_detail(file_id):
 
 
 @app.route("/api/files/<int:file_id>/download", methods=["GET"])
-@jwt_required()
 def download_file(file_id):
-    """下载/预览文件"""
+    """下载/预览文件（通过 token 查询参数或 Authorization header 认证）"""
+    from flask_jwt_extended import decode_token
+    from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+
+    # 先尝试从 query string 获取 token
+    token = request.args.get("token")
+    if not token:
+        # 再尝试从 Authorization header
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+
+    if not token:
+        return fail("请先登录", 401)
+
+    try:
+        decode_token(token)
+    except (ExpiredSignatureError, InvalidTokenError, Exception):
+        return fail("登录已过期，请重新登录", 401)
+
     pf = ProjectFile.query.get(file_id)
     if not pf:
         return fail("文件不存在", 404)

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getStats, type StatsData, type ApiResponse } from "@/lib/api";
+import { getStats, type StatsData } from "@/lib/api";
 import { useRequireAuth } from "@/lib/auth-context";
 import Link from "next/link";
 
@@ -17,9 +17,9 @@ function ProgressBar({ value, max, color }: { value: number; max: number; color:
   );
 }
 
-function StatCard({ label, value, icon, color }: { label: string; value: number; icon: string; color: string }) {
+function StatCard({ label, value, icon, color, tip }: { label: string; value: number; icon: string; color: string; tip?: string }) {
   return (
-    <div className="glass-card p-5 flex items-center gap-4">
+    <div className="glass-card p-5 flex items-center gap-4" title={tip}>
       <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-xl flex-shrink-0`}>
         {icon}
       </div>
@@ -38,7 +38,7 @@ export default function StatsPage() {
 
   const loadStats = useCallback(async () => {
     try {
-      const res = await getStats() as ApiResponse<StatsData>;
+      const res = await getStats();
       setStats(res.data || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "加载失败");
@@ -93,11 +93,11 @@ export default function StatsPage() {
 
         {/* Overview Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 animate-slide-up">
-          <StatCard label="项目总数" value={stats.overview.projects} icon="📁" color="from-purple-500/20 to-violet-500/20" />
-          <StatCard label="任务总数" value={stats.overview.tasks} icon="📋" color="from-blue-500/20 to-cyan-500/20" />
-          <StatCard label="团队成员" value={stats.overview.members} icon="👥" color="from-emerald-500/20 to-teal-500/20" />
-          <StatCard label="文件数" value={stats.overview.files} icon="📄" color="from-orange-500/20 to-amber-500/20" />
-          <StatCard label="用户数" value={stats.overview.users} icon="👤" color="from-pink-500/20 to-rose-500/20" />
+          <StatCard label="项目总数" value={stats.overview.projects} icon="📁" color="from-purple-500/20 to-violet-500/20" tip="所有项目的数量" />
+          <StatCard label="任务总数" value={stats.overview.tasks} icon="📋" color="from-blue-500/20 to-cyan-500/20" tip="所有任务的数量" />
+          <StatCard label="团队成员" value={stats.overview.members} icon="👥" color="from-emerald-500/20 to-teal-500/20" tip="所有项目成员关系总数" />
+          <StatCard label="文件数" value={stats.overview.files} icon="📄" color="from-orange-500/20 to-amber-500/20" tip="已上传文件总数" />
+          <StatCard label="平台用户" value={stats.overview.users} icon="👤" color="from-pink-500/20 to-rose-500/20" tip="平台注册用户数" />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">

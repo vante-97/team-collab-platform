@@ -21,7 +21,6 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 添加成员
   const [showAdd, setShowAdd] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newRole, setNewRole] = useState("member");
@@ -30,17 +29,15 @@ export default function TeamPage() {
 
   // 加载项目
   useEffect(() => {
-    if (isAuthenticated) {
-      getProjects().then((res) => {
-        if (res.code === 200 && res.data) {
-          setProjects(res.data);
-          if (!selectedProject && res.data.length > 0) {
-            setSelectedProject(res.data[0].id);
-          }
-        }
-      }).catch(() => {});
-    }
-  }, [isAuthenticated, selectedProject]);
+    if (!isAuthenticated) return;
+    getProjects().then((res) => {
+      if (res.code === 200 && res.data && res.data.length > 0) {
+        setProjects(res.data);
+        setSelectedProject((prev) => prev ?? res.data[0].id);
+      }
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   // 加载成员
   const fetchMembers = useCallback(async () => {
@@ -83,7 +80,7 @@ export default function TeamPage() {
     }
   };
 
-  const handleRoleChange = async (memberId: number, role: string) => {
+  const handleRoleChange = async (memberId: number, role: TeamMember["role"]) => {
     try {
       await updateMemberRole(memberId, role);
       setMembers((prev) => prev.map((m) => (m.id === memberId ? { ...m, role } : m)));
@@ -105,7 +102,7 @@ export default function TeamPage() {
   if (authLoading || !isAuthenticated) {
     return (
       <div className="page-bg flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        <div className="spinner" />
       </div>
     );
   }
@@ -117,59 +114,69 @@ export default function TeamPage() {
     <div className="page-bg">
       <div className="max-w-4xl mx-auto px-6 py-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
+        <div className="page-header animate-fade-in">
           <div>
-            <h1 className="text-2xl font-bold text-white">团队协作</h1>
-            <p className="text-white/30 text-sm mt-1">管理项目成员与权限</p>
+            <h1 className="page-title">团队协作</h1>
+            <p className="page-subtitle">管理项目成员与权限</p>
           </div>
           <div className="flex gap-3">
             <select
               value={selectedProject ?? ""}
               onChange={(e) => setSelectedProject(Number(e.target.value))}
-              className="glass-input w-auto text-sm py-2"
+              className="glass-select text-sm"
             >
               {projects.map((p) => (
                 <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>
               ))}
             </select>
             {canManage && (
-              <button onClick={() => { setShowAdd(true); setAddError(""); }} className="btn-primary text-sm">
-                + 添加成员
-              </button>
+              <button onClick={() => { setShowAdd(true); setAddError(""); }} className="btn-primary text-sm">+ 添加成员</button>
+            )}
+          </div>
+        </div>
+
+        {/* Permission Hint */}
+        <div className="mb-6 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] animate-fade-in">
+          <div className="flex items-center gap-2 text-sm text-white/50">
+            <span className="text-purple-400">🔒</span>
+            {currentUserMember ? (
+              <span>
+                当前身份：
+                <span className="text-white/70 font-medium ml-1">
+                  {ROLE_MAP[currentUserMember.role]?.label || "成员"}
+                </span>
+                {canManage ? (
+                  <span className="ml-2 text-emerald-400/80">拥有添加/移除成员和修改角色权限</span>
+                ) : (
+                  <span className="ml-2 text-white/30">仅可查看成员列表</span>
+                )}
+              </span>
+            ) : (
+              <span>你尚未加入当前项目，无法查看成员操作</span>
             )}
           </div>
         </div>
 
         {/* Add Member Modal */}
         {showAdd && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowAdd(false)}>
-            <div className="glass-card p-6 w-full max-w-md mx-4 border-white/[0.12] animate-scale-in" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-overlay" onClick={() => setShowAdd(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h2 className="text-lg font-semibold text-white mb-5">添加团队成员</h2>
               {addError && (
                 <div className="mb-3 p-3 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-sm">{addError}</div>
               )}
-              <input
-                type="text"
-                placeholder="输入用户名"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-                className="glass-input mb-3"
-                autoFocus
-              />
+              <input type="text" placeholder="输入用户名" value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)} className="glass-input mb-3" autoFocus />
               <div className="mb-5">
-                <label className="block text-white/50 text-sm mb-2">角色</label>
+                <label className="block text-white/40 text-sm mb-2">角色</label>
                 <div className="flex gap-2">
                   {["admin", "member", "viewer"].map((r) => {
                     const roleInfo = ROLE_MAP[r];
                     return (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => setNewRole(r)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${roleInfo.color} ${newRole === r ? "ring-2 ring-purple-500/40" : "opacity-50 hover:opacity-80"}`}
-                      >
-                        {roleInfo.label}
-                      </button>
+                      <button key={r} type="button" onClick={() => setNewRole(r)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${roleInfo.color} ${
+                          newRole === r ? "ring-2 ring-purple-500/40" : "opacity-50 hover:opacity-80"
+                        }`}>{roleInfo.label}</button>
                     );
                   })}
                 </div>
@@ -195,25 +202,26 @@ export default function TeamPage() {
         {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center py-20 animate-fade-in">
-            <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-            <span className="ml-3 text-white/30 text-sm">加载中...</span>
+            <div className="spinner" />
+            <span className="ml-3 text-white/25 text-sm">加载中...</span>
           </div>
         )}
 
         {/* Empty */}
         {!loading && !error && members.length === 0 && (
-          <div className="text-center py-20 animate-fade-in">
-            <div className="text-5xl mb-4 opacity-30">👥</div>
-            <p className="text-white/25 text-lg mb-2">暂无团队成员</p>
-            <p className="text-white/15 text-sm">添加成员开始协作</p>
+          <div className="empty-state animate-fade-in">
+            <div className="empty-state-icon">👥</div>
+            <div className="empty-state-title">暂无团队成员</div>
+            <div className="empty-state-desc mb-4">添加成员开始协作</div>
+            {canManage && <button onClick={() => setShowAdd(true)} className="btn-primary text-sm">添加第一个成员</button>}
           </div>
         )}
 
         {/* Members List */}
         {!loading && !error && members.length > 0 && (
-          <div className="glass-card divide-y divide-white/[0.04] animate-slide-up overflow-hidden">
+          <div className="glass-card divide-y divide-white/[0.03] overflow-hidden animate-slide-up">
             {/* Table Header */}
-            <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-6 py-3 text-white/25 text-xs font-medium">
+            <div className="hidden md:grid grid-cols-[1fr_auto_auto] gap-4 px-6 py-3 text-white/20 text-xs font-medium">
               <span>成员</span>
               <span>角色</span>
               <span className="text-right">操作</span>
@@ -223,11 +231,7 @@ export default function TeamPage() {
               const roleInfo = ROLE_MAP[member.role] || ROLE_MAP.member;
               const isMe = member.username === user?.username;
               return (
-                <div
-                  key={member.id}
-                  className="grid grid-cols-[1fr_auto_auto] gap-4 px-6 py-4 items-center hover:bg-white/[0.01] transition-colors"
-                >
-                  {/* User Info */}
+                <div key={member.id} className="flex flex-col md:grid md:grid-cols-[1fr_auto_auto] gap-2 md:gap-4 px-4 md:px-6 py-4 items-start md:items-center hover:bg-white/[0.01] transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400/20 to-violet-400/20 flex items-center justify-center text-purple-300 text-sm font-bold shrink-0">
                       {member.username?.charAt(0).toUpperCase()}
@@ -235,40 +239,28 @@ export default function TeamPage() {
                     <div className="min-w-0">
                       <p className="text-white/80 text-sm font-medium truncate">
                         {member.username}
-                        {isMe && <span className="text-white/20 text-xs ml-1.5">(你)</span>}
+                        {isMe && <span className="text-white/15 text-xs ml-1.5">(你)</span>}
                       </p>
-                      <p className="text-white/20 text-xs truncate">{member.email}</p>
+                      <p className="text-white/15 text-xs truncate">{member.email}</p>
                     </div>
                   </div>
 
-                  {/* Role */}
-                  <div>
+                  <div className="ml-12 md:ml-0">
                     {canManage && member.role !== "owner" ? (
-                      <select
-                        value={member.role}
-                        onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                        className="text-xs bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-white/70 focus:outline-none focus:border-purple-500/40 transition-colors"
-                      >
+                      <select value={member.role} onChange={(e) => handleRoleChange(member.id, e.target.value as TeamMember["role"])}
+                        className="text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-white/60 focus:outline-none focus:border-purple-500/40 transition-colors cursor-pointer">
                         <option value="admin" className="bg-slate-800">管理员</option>
                         <option value="member" className="bg-slate-800">成员</option>
                         <option value="viewer" className="bg-slate-800">观察者</option>
                       </select>
                     ) : (
-                      <span className={`status-badge ${roleInfo.color}`}>
-                        {roleInfo.label}
-                      </span>
+                      <span className={`status-badge ${roleInfo.color}`}>{roleInfo.label}</span>
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="text-right">
+                  <div className="ml-12 md:ml-0 md:text-right">
                     {canManage && member.role !== "owner" && (
-                      <button
-                        onClick={() => handleRemove(member.id, member.username)}
-                        className="btn-danger text-xs"
-                      >
-                        移除
-                      </button>
+                      <button onClick={() => handleRemove(member.id, member.username)} className="btn-danger">移除</button>
                     )}
                   </div>
                 </div>

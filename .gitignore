@@ -42,8 +42,21 @@ env/
 # SQLite
 backend/*.db
 
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Deps marker
+backend/.deps_installed
+
+# Backend logs
+backend/*.log
+
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# CodeBuddy
+.codebuddy/

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRequireAuth } from "@/lib/auth-context";
-import { getProjects, createProject, deleteProject, Project } from "@/lib/api";
+import { getProjects, createProject, deleteProject, updateProject, Project } from "@/lib/api";
+import Link from "next/link";
 
 const STATUS_MAP: Record<string, { label: string; color: string; dot: string }> = {
   planning: { label: "规划中", color: "bg-blue-500/10 text-blue-400 border-blue-500/20", dot: "bg-blue-400" },
@@ -18,6 +19,8 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showCreate, setShowCreate] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [newStatus, setNewStatus] = useState("planning");
@@ -172,41 +175,105 @@ export default function ProjectsPage() {
 
         {/* Project Grid */}
         {!loading && !error && projects.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {projects.map((proj, i) => {
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 stagger">
+            {projects.map((proj) => {
               const statusInfo = STATUS_MAP[proj.status] || STATUS_MAP.planning;
               return (
-                <div
-                  key={proj.id}
-                  className="glass-card p-5 group cursor-pointer transition-all duration-300 hover:-translate-y-0.5 animate-slide-up"
-                  style={{ animationDelay: `${i * 0.05}s` }}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-white font-semibold truncate flex-1 mr-2">{proj.name}</h3>
-                    <span className={`status-badge shrink-0 ${statusInfo.color}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`} />
-                      {statusInfo.label}
-                    </span>
-                  </div>
-                  {proj.description ? (
-                    <p className="text-white/30 text-sm mb-4 line-clamp-2">{proj.description}</p>
-                  ) : (
-                    <p className="text-white/10 text-sm mb-4 italic">暂无描述</p>
-                  )}
-                  <div className="flex items-center justify-between">
+                <div key={proj.id} className="glass-card p-5 group transition-all duration-300 hover:-translate-y-0.5">
+                  <Link href={`/projects/${proj.id}`} className="block">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="text-white font-semibold truncate flex-1 mr-2 hover:text-purple-300 transition-colors">{proj.name}</h3>
+                      <span className={`status-badge shrink-0 ${statusInfo.color}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`} />
+                        {statusInfo.label}
+                      </span>
+                    </div>
+                    {proj.description ? (
+                      <p className="text-white/30 text-sm mb-4 line-clamp-2">{proj.description}</p>
+                    ) : (
+                      <p className="text-white/10 text-sm mb-4 italic">暂无描述</p>
+                    )}
+                  </Link>
+                  <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
                     <span className="text-white/20 text-xs">
                       {new Date(proj.created_at).toLocaleDateString("zh-CN")}
                     </span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDelete(proj.id, proj.name); }}
-                      className="opacity-0 group-hover:opacity-100 btn-danger text-xs transition-all duration-200"
-                    >
-                      删除
-                    </button>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setEditingProject(proj);
+                          setNewName(proj.name);
+                          setNewDesc(proj.description);
+                          setNewStatus(proj.status);
+                          setShowEdit(true);
+                        }}
+                        className="text-white/30 hover:text-white/70 text-xs px-2 py-1 rounded hover:bg-white/[0.04] transition-colors"
+                      >
+                        编辑
+                      </button>
+                      <button
+                        onClick={(e) => { e.preventDefault(); handleDelete(proj.id, proj.name); }}
+                        className="text-red-400/50 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-400/5 transition-colors"
+                      >
+                        删除
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Edit Modal */}
+        {showEdit && editingProject && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowEdit(false)}>
+            <div className="glass-card p-6 w-full max-w-md mx-4 border-white/[0.12] animate-scale-in" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-lg font-semibold text-white mb-5">编辑项目</h2>
+              <input
+                type="text" placeholder="项目名称" value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="glass-input mb-3" autoFocus
+              />
+              <textarea
+                placeholder="项目描述（可选）" value={newDesc}
+                onChange={(e) => setNewDesc(e.target.value)}
+                rows={3} className="glass-input mb-3 resize-none"
+              />
+              <div className="mb-5">
+                <label className="block text-white/50 text-sm mb-2">状态</label>
+                <div className="flex gap-2">
+                  {Object.entries(STATUS_MAP).map(([key, val]) => (
+                    <button key={key} type="button" onClick={() => setNewStatus(key)}
+                      className={`status-badge cursor-pointer ${val.color} ${newStatus === key ? "ring-2 ring-purple-500/40" : "opacity-50 hover:opacity-80"}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${val.dot}`} />{val.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setShowEdit(false)} className="btn-secondary text-sm">取消</button>
+                <button
+                  onClick={async () => {
+                    if (!newName.trim() || !editingProject) return;
+                    try {
+                      const res = await updateProject(editingProject.id, { name: newName, description: newDesc, status: newStatus });
+                      if (res.code === 200) {
+                        setProjects((prev) => prev.map((p) => p.id === editingProject.id ? res.data : p));
+                        setShowEdit(false);
+                      }
+                    } catch (err) {
+                      alert(err instanceof Error ? err.message : "更新失败");
+                    }
+                  }}
+                  disabled={!newName.trim()}
+                  className="btn-primary text-sm"
+                >
+                  保存修改
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

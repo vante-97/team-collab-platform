@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useAuth } from "@/lib/auth-context";
-import { getProjects, getProjectFiles, uploadFile, deleteFile, getFileDownloadUrl, type Project, type ProjectFile, type ApiResponse } from "@/lib/api";
-import { useRequireAuth } from "@/lib/auth-context";
-import Link from "next/link";
+import { useAuth, useRequireAuth } from "@/lib/auth-context";
+import { getProjects, getProjectFiles, uploadFile, deleteFile, getFileDownloadUrl, type Project, type ProjectFile } from "@/lib/api";
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -23,7 +21,7 @@ function typeLabel(type: string): string {
 }
 
 export default function FilesPage() {
-  const { isAuthenticated, loading } = useRequireAuth();
+  const { isAuthenticated, loading: authLoading } = useRequireAuth();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -32,18 +30,27 @@ export default function FilesPage() {
   const [files, setFiles] = useState<ProjectFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const [msgType, setMsgType] = useState<"success" | "error">("success");
+
+  const showMsg = (type: "success" | "error", text: string) => {
+    setMsgType(type);
+    setMessage(text);
+    setTimeout(() => setMessage(""), 4000);
+  };
 
   const loadProjects = useCallback(async () => {
     try {
-      const res = await getProjects() as ApiResponse<Project[]>;
-      setProjects(res.data || []);
-      if (res.data && res.data.length > 0 && !selectedProject) {
-        setSelectedProject(res.data[0].id);
+      const res = await getProjects();
+      if (res.data && res.data.length > 0) {
+        setProjects(res.data);
+        setSelectedProject((prev) => prev ?? res.data[0].id);
+      } else {
+        setProjects(res.data || []);
       }
     } catch {
       // ignore
     }
-  }, [selectedProject]);
+  }, []);
 
   const loadFiles = useCallback(async () => {
     if (!selectedProject) return;
@@ -56,10 +63,8 @@ export default function FilesPage() {
   }, [selectedProject]);
 
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      loadProjects();
-    }
-  }, [loading, isAuthenticated, loadProjects]);
+    if (!authLoading && isAuthenticated) loadProjects();
+  }, [authLoading, isAuthenticated, loadProjects]);
 
   useEffect(() => {
     loadFiles();
@@ -68,15 +73,13 @@ export default function FilesPage() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProject) return;
-
     setUploading(true);
-    setMessage("");
     try {
       await uploadFile(selectedProject, file);
-      setMessage(`"${file.name}" 上传成功`);
+      showMsg("success", `"${file.name}" 上传成功`);
       loadFiles();
     } catch (err) {
-      setMessage("上传失败：" + (err instanceof Error ? err.message : "未知错误"));
+      showMsg("error", "上传失败：" + (err instanceof Error ? err.message : "未知错误"));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -88,16 +91,16 @@ export default function FilesPage() {
     try {
       await deleteFile(fileId);
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
-      setMessage(`"${name}" 已删除`);
+      showMsg("success", `"${name}" 已删除`);
     } catch (err) {
-      setMessage("删除失败：" + (err instanceof Error ? err.message : "未知错误"));
+      showMsg("error", "删除失败：" + (err instanceof Error ? err.message : "未知错误"));
     }
   };
 
-  if (loading || !isAuthenticated) {
+  if (authLoading || !isAuthenticated) {
     return (
       <div className="page-bg flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        <div className="spinner" />
       </div>
     );
   }
@@ -108,67 +111,65 @@ export default function FilesPage() {
     <div className="page-bg">
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
+        <div className="page-header animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-white">文件管理</h1>
-            <p className="text-white/35 text-sm mt-1">上传、预览和管理项目文件</p>
+            <h1 className="page-title">文件管理</h1>
+            <p className="page-subtitle">上传、预览和管理项目文件</p>
           </div>
           <div className="flex gap-3">
             <select
               value={selectedProject || ""}
               onChange={(e) => setSelectedProject(Number(e.target.value))}
-              className="glass-input py-2 px-3 text-sm"
+              className="glass-select text-sm"
             >
+              {projects.length === 0 && <option value="" className="bg-slate-800">暂无项目</option>}
               {projects.map((p) => (
                 <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>
               ))}
             </select>
-            <label className="btn-primary cursor-pointer text-sm">
+            <label className="btn-primary cursor-pointer text-sm whitespace-nowrap min-w-[110px]">
               {uploading ? "上传中..." : "+ 上传文件"}
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                onChange={handleUpload}
-                disabled={uploading}
-              />
+              <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
             </label>
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats Mini */}
         <div className="glass-card p-4 mb-6 flex gap-6 animate-slide-up">
-          <div className="text-center">
-            <div className="text-white/30 text-xs">文件总数</div>
+          <div className="text-center flex-1">
+            <div className="text-white/25 text-[11px]">文件总数</div>
             <div className="text-white font-semibold text-lg">{files.length}</div>
           </div>
-          <div className="text-center">
-            <div className="text-white/30 text-xs">总大小</div>
+          <div className="text-center flex-1">
+            <div className="text-white/25 text-[11px]">总大小</div>
             <div className="text-white font-semibold text-lg">{formatSize(totalSize)}</div>
           </div>
-          <div className="text-center">
-            <div className="text-white/30 text-xs">上传者</div>
+          <div className="text-center flex-1">
+            <div className="text-white/25 text-[11px]">上传者</div>
             <div className="text-white font-semibold text-lg">{user?.username}</div>
           </div>
         </div>
 
         {/* Message */}
         {message && (
-          <div className={`mb-4 p-3 rounded-xl text-sm ${message.includes("失败") ? "bg-red-500/5 border border-red-500/15 text-red-400" : "bg-emerald-500/5 border border-emerald-500/15 text-emerald-400"}`}>
-            {message}
-          </div>
+          <div className={`mb-4 p-3 rounded-xl text-sm animate-slide-down ${
+            msgType === "error"
+              ? "bg-red-500/5 border border-red-500/15 text-red-400"
+              : "bg-emerald-500/5 border border-emerald-500/15 text-emerald-400"
+          }`}>{message}</div>
         )}
 
         {/* File List */}
         {files.length === 0 ? (
           <div className="glass-card p-12 text-center animate-slide-up">
-            <div className="text-5xl mb-4">📂</div>
-            <p className="text-white/30 text-lg mb-2">暂无文件</p>
-            <p className="text-white/20 text-sm">点击上方按钮上传第一个文件</p>
+            <div className="empty-state-icon">📂</div>
+            <div className="empty-state-title">暂无文件</div>
+            <div className="empty-state-desc">选择项目后点击上方按钮上传第一个文件</div>
           </div>
         ) : (
           <div className="glass-card overflow-hidden animate-slide-up">
-            <div className="grid grid-cols-[1fr_80px_100px_120px_60px] gap-4 px-6 py-3 border-b border-white/[0.04] text-white/30 text-xs font-medium">
+            {/* Desktop Table Header */}
+            <div className="hidden md:grid grid-cols-[1fr_100px_100px_120px_60px] gap-4 px-6 py-3 border-b border-white/[0.04] text-white/25 text-xs font-medium">
               <span>文件名</span>
               <span>类型</span>
               <span>大小</span>
@@ -176,31 +177,44 @@ export default function FilesPage() {
               <span></span>
             </div>
             {files.map((file) => (
-              <div
-                key={file.id}
-                className="grid grid-cols-[1fr_80px_100px_120px_60px] gap-4 px-6 py-3.5 border-b border-white/[0.02] hover:bg-white/[0.01] transition-colors items-center"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-xl flex-shrink-0">{typeIcon(file.file_type)}</span>
-                  <a
-                    href={getFileDownloadUrl(file.id)}
-                    target="_blank"
-                    className="text-white/80 text-sm hover:text-purple-400 truncate transition-colors"
-                    title={file.original_name}
-                  >
-                    {file.original_name}
-                  </a>
+              <div key={file.id} className="border-b border-white/[0.02] hover:bg-white/[0.01] transition-colors">
+                {/* Desktop Row */}
+                <div className="hidden md:grid grid-cols-[1fr_100px_100px_120px_60px] gap-4 px-6 py-3.5 items-center">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xl flex-shrink-0">{typeIcon(file.file_type)}</span>
+                    <button
+                      onClick={() => window.open(getFileDownloadUrl(file.id), "_blank")}
+                      className="text-white/80 text-sm hover:text-purple-400 truncate transition-colors text-left"
+                      title={file.original_name}
+                    >
+                      {file.original_name}
+                    </button>
+                  </div>
+                  <span className="text-white/25 text-xs">{typeLabel(file.file_type)}</span>
+                  <span className="text-white/25 text-xs">{formatSize(file.file_size)}</span>
+                  <span className="text-white/35 text-xs">{file.uploader_name}</span>
+                  <button onClick={() => handleDelete(file.id, file.original_name)}
+                    className="text-white/15 hover:text-red-400 text-xs transition-colors">删除</button>
                 </div>
-                <span className="text-white/30 text-xs">{typeLabel(file.file_type)}</span>
-                <span className="text-white/30 text-xs">{formatSize(file.file_size)}</span>
-                <span className="text-white/40 text-xs">{file.uploader_name}</span>
-                <button
-                  onClick={() => handleDelete(file.id, file.original_name)}
-                  className="text-white/20 text-xs hover:text-red-400 transition-colors"
-                  title="删除"
-                >
-                  删除
-                </button>
+                {/* Mobile Row */}
+                <div className="md:hidden px-4 py-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{typeIcon(file.file_type)}</span>
+                    <button
+                      onClick={() => window.open(getFileDownloadUrl(file.id), "_blank")}
+                      className="text-white/80 text-sm hover:text-purple-400 truncate transition-colors text-left flex-1"
+                    >
+                      {file.original_name}
+                    </button>
+                    <button onClick={() => handleDelete(file.id, file.original_name)}
+                      className="text-white/15 hover:text-red-400 text-xs transition-colors">删除</button>
+                  </div>
+                  <div className="flex gap-3 text-[11px] text-white/25 pl-7">
+                    <span>{typeLabel(file.file_type)}</span>
+                    <span>{formatSize(file.file_size)}</span>
+                    <span>{file.uploader_name}</span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
