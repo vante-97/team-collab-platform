@@ -337,6 +337,12 @@ def projects():
         )
         db.session.add(proj)
         db.session.commit()
+
+        # 创建者自动加入项目，成为 owner
+        membership = TeamMember(user_id=user_id, project_id=proj.id, role="owner")
+        db.session.add(membership)
+        db.session.commit()
+
         return ok(proj.to_dict(), "项目创建成功", 201)
 
 
