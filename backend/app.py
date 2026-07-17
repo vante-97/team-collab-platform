@@ -409,25 +409,23 @@ def init_db():
             db.session.commit()
             print("[DB] 示例项目已插入。")
 
-        # 确保示例项目存在示例成员关系，方便演示完整管理功能
-        owner = User.query.filter_by(username="testuser1").first()
-        admin = User.query.filter_by(username="admin").first()
-        member = User.query.filter_by(username="testuser2").first()
-        if not projects_data:
-            projects_data = Project.query.all()
-        for proj in projects_data:
-            existing_user_ids = {m.user_id for m in TeamMember.query.filter_by(project_id=proj.id).all()}
-            memberships = []
-            if owner and owner.id not in existing_user_ids:
-                memberships.append(TeamMember(user_id=owner.id, project_id=proj.id, role="owner"))
-            if admin and admin.id not in existing_user_ids:
-                memberships.append(TeamMember(user_id=admin.id, project_id=proj.id, role="admin"))
-            if member and member.id not in existing_user_ids:
-                memberships.append(TeamMember(user_id=member.id, project_id=proj.id, role="member"))
-            if memberships:
-                db.session.add_all(memberships)
-        db.session.commit()
-        print("[DB] 示例成员关系已同步。")
+            # 只在首次创建示例项目时，给示例项目绑定示例成员关系
+            owner = User.query.filter_by(username="testuser1").first()
+            admin = User.query.filter_by(username="admin").first()
+            member = User.query.filter_by(username="testuser2").first()
+            for proj in projects_data:
+                existing_user_ids = {m.user_id for m in TeamMember.query.filter_by(project_id=proj.id).all()}
+                memberships = []
+                if owner and owner.id not in existing_user_ids:
+                    memberships.append(TeamMember(user_id=owner.id, project_id=proj.id, role="owner"))
+                if admin and admin.id not in existing_user_ids:
+                    memberships.append(TeamMember(user_id=admin.id, project_id=proj.id, role="admin"))
+                if member and member.id not in existing_user_ids:
+                    memberships.append(TeamMember(user_id=member.id, project_id=proj.id, role="member"))
+                if memberships:
+                    db.session.add_all(memberships)
+            db.session.commit()
+            print("[DB] 示例成员关系已同步。")
 
 
 
