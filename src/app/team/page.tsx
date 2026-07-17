@@ -120,18 +120,18 @@ export default function TeamPage() {
             <h1 className="page-title">团队协作</h1>
             <p className="page-subtitle">管理项目成员与权限</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
             <select
               value={selectedProject ?? ""}
               onChange={(e) => setSelectedProject(Number(e.target.value))}
-              className="glass-select text-sm"
+              className="glass-select text-sm min-w-[140px]"
             >
               {projects.map((p) => (
                 <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>
               ))}
             </select>
             {canManage && (
-              <button onClick={() => { setShowAdd(true); setAddError(""); }} className="btn-primary text-sm">+ 添加成员</button>
+              <button onClick={() => { setShowAdd(true); setAddError(""); }} className="btn-primary text-sm whitespace-nowrap flex-shrink-0">+ 添加成员</button>
             )}
           </div>
         </div>
