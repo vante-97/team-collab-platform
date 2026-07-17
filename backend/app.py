@@ -190,6 +190,39 @@ class TeamMember(db.Model):
         }
 
 
+# ---- 邀请模型 ----
+class Invitation(db.Model):
+    __tablename__ = "invitations"
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey("projects.id"), nullable=False)
+    inviter_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    invitee_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    role = db.Column(db.String(20), default="member")  # admin / member / viewer
+    status = db.Column(db.String(20), default="pending")  # pending / accepted / rejected
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc),
+                           onupdate=lambda: datetime.now(timezone.utc))
+
+    project = db.relationship("Project", backref="invitations", lazy=True)
+    inviter = db.relationship("User", foreign_keys=[inviter_id], backref="sent_invitations", lazy=True)
+    invitee = db.relationship("User", foreign_keys=[invitee_id], backref="received_invitations", lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "project_id": self.project_id,
+            "project_name": self.project.name if self.project else None,
+            "inviter_id": self.inviter_id,
+            "inviter_name": self.inviter.username if self.inviter else None,
+            "invitee_id": self.invitee_id,
+            "invitee_name": self.invitee.username if self.invitee else None,
+            "role": self.role,
+            "status": self.status,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
 # ---- 通用响应包装 ----
 def ok(data=None, message="success", code=200):
     return jsonify({"code": code, "message": message, "data": data,
@@ -538,34 +571,106 @@ def project_members(project_id):
         return ok([m.to_dict() for m in members])
 
     elif request.method == "POST":
-        # 权限检查：只有 owner 或 admin 才能添加成员
+        # 权限检查：只有 owner 或 admin 才能发送邀请
         current_member = TeamMember.query.filter_by(user_id=user_id, project_id=project_id).first()
         if not current_member or current_member.role not in ("owner", "admin"):
             return fail("你没有权限添加成员", 403)
 
         data = request.get_json(silent=True) or {}
-        member_username = data.get("username", "").strip()
+        invitee_username = data.get("username", "").strip()
         role = data.get("role", "member")
 
-        if not member_username:
+        if not invitee_username:
             return fail("请输入用户名", 400)
         if role not in ("admin", "member", "viewer"):
             return fail("无效的角色", 400)
 
-        # 查找要添加的用户
-        member_user = User.query.filter_by(username=member_username).first()
-        if not member_user:
+        # 查找要邀请的用户
+        invitee = User.query.filter_by(username=invitee_username).first()
+        if not invitee:
             return fail("用户不存在", 404)
+        if invitee.id == user_id:
+            return fail("不能邀请自己", 400)
 
         # 检查是否已是成员
-        existing = TeamMember.query.filter_by(user_id=member_user.id, project_id=project_id).first()
+        existing = TeamMember.query.filter_by(user_id=invitee.id, project_id=project_id).first()
         if existing:
             return fail("该用户已是项目成员", 400)
 
-        member = TeamMember(user_id=member_user.id, project_id=project_id, role=role)
-        db.session.add(member)
+        # 检查是否已有待处理的邀请
+        pending = Invitation.query.filter_by(
+            project_id=project_id, invitee_id=invitee.id, status="pending"
+        ).first()
+        if pending:
+            return fail("已向该用户发送过邀请，请等待对方处理", 400)
+
+        inv = Invitation(
+            project_id=project_id,
+            inviter_id=user_id,
+            invitee_id=invitee.id,
+            role=role,
+        )
+        db.session.add(inv)
         db.session.commit()
-        return ok(member.to_dict(), "成员添加成功", 201)
+        return ok(inv.to_dict(), "邀请已发送", 201)
+
+
+# ---- 邀请 API ----
+@app.route("/api/invitations", methods=["GET"])
+@jwt_required()
+def get_invitations():
+    """获取当前用户的邀请列表（收到的 + 发出的）"""
+    user_id = int(get_jwt_identity())
+    received = Invitation.query.filter_by(invitee_id=user_id).order_by(Invitation.created_at.desc()).all()
+    sent = Invitation.query.filter_by(inviter_id=user_id).order_by(Invitation.created_at.desc()).all()
+    return ok({
+        "received": [i.to_dict() for i in received],
+        "sent": [i.to_dict() for i in sent],
+    })
+
+
+@app.route("/api/invitations/<int:invitation_id>/respond", methods=["PUT"])
+@jwt_required()
+def respond_invitation(invitation_id):
+    """接受或拒绝邀请"""
+    user_id = int(get_jwt_identity())
+    inv = Invitation.query.get(invitation_id)
+    if not inv:
+        return fail("邀请不存在", 404)
+    if inv.invitee_id != user_id:
+        return fail("该邀请不是发给你的", 403)
+    if inv.status != "pending":
+        return fail("该邀请已被处理", 400)
+
+    data = request.get_json(silent=True) or {}
+    action = data.get("action", "").strip()
+    if action not in ("accept", "reject"):
+        return fail("请选择 accept 或 reject", 400)
+
+    if action == "reject":
+        inv.status = "rejected"
+        db.session.commit()
+        return ok(inv.to_dict(), "已拒绝邀请")
+
+    # accept
+    existing = TeamMember.query.filter_by(user_id=user_id, project_id=inv.project_id).first()
+    if existing:
+        return fail("你已经是该项目的成员", 400)
+
+    membership = TeamMember(user_id=user_id, project_id=inv.project_id, role=inv.role)
+    inv.status = "accepted"
+    db.session.add(membership)
+    db.session.commit()
+    return ok({"member": membership.to_dict(), "invitation": inv.to_dict()}, "已加入项目")
+
+
+@app.route("/api/invitations/unread-count", methods=["GET"])
+@jwt_required()
+def unread_invitation_count():
+    """获取未处理的邀请数量"""
+    user_id = int(get_jwt_identity())
+    count = Invitation.query.filter_by(invitee_id=user_id, status="pending").count()
+    return ok({"count": count})
 
 
 @app.route("/api/members/<int:member_id>", methods=["PUT", "DELETE"])

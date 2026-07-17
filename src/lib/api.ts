@@ -235,6 +235,48 @@ export async function removeMember(memberId: number): Promise<ApiResponse<null>>
   });
 }
 
+// ---- 邀请 API ----
+export interface Invitation {
+  id: number;
+  project_id: number;
+  project_name: string;
+  inviter_id: number;
+  inviter_name: string;
+  invitee_id: number;
+  invitee_name: string;
+  role: string;
+  status: "pending" | "accepted" | "rejected";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvitationsData {
+  received: Invitation[];
+  sent: Invitation[];
+}
+
+export async function getInvitations(): Promise<ApiResponse<InvitationsData>> {
+  return fetchApi<ApiResponse<InvitationsData>>("/api/invitations");
+}
+
+export async function respondInvitation(
+  invitationId: number,
+  action: "accept" | "reject"
+): Promise<ApiResponse<{ member?: TeamMember; invitation: Invitation }>> {
+  return fetchApi<ApiResponse<{ member?: TeamMember; invitation: Invitation }>>(
+    `/api/invitations/${invitationId}/respond`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    }
+  );
+}
+
+export async function getUnreadCount(): Promise<ApiResponse<{ count: number }>> {
+  return fetchApi<ApiResponse<{ count: number }>>("/api/invitations/unread-count");
+}
+
 // ---- 文件管理 API ----
 export interface ProjectFile {
   id: number;

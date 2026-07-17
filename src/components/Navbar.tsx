@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getUnreadCount } from "@/lib/api";
 
 const navLinks = [
   { href: "/", label: "仪表盘", icon: "◈" },
@@ -18,6 +19,26 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, logout, isAuthenticated } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnread = () => {
+    if (!isAuthenticated) return;
+    getUnreadCount().then((res) => {
+      if (res.code === 200 && res.data) {
+        setUnreadCount(res.data.count);
+      }
+    }).catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchUnread();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const handler = () => fetchUnread();
+    window.addEventListener("inbox-refresh", handler);
+    return () => window.removeEventListener("inbox-refresh", handler);
+  }, [isAuthenticated]);
 
   // 项目详情页也标记"项目"为活跃
   const isActive = (href: string) => {
@@ -64,10 +85,40 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Right: User + Logout (Desktop) */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Right: User + Inbox + Logout (Desktop) */}
+        <div className="hidden md:flex items-center gap-2">
           {isAuthenticated ? (
             <>
+              {/* Inbox */}
+              <Link
+                href="/inbox"
+                className={`relative p-2 rounded-lg transition-all duration-200 ${
+                  pathname === "/inbox"
+                    ? "bg-purple-500/15 text-purple-300"
+                    : "text-white/40 hover:text-white/75 hover:bg-white/[0.04]"
+                }`}
+                title="收件箱"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M22 12h-6l-2 3H10l-2-3H2" />
+                  <path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-4.5 h-4.5 rounded-full bg-purple-500 text-white text-[10px] font-bold leading-none min-w-[16px] min-h-[16px]">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center text-white text-[10px] font-bold">
                   {user?.username?.charAt(0).toUpperCase()}
@@ -95,6 +146,31 @@ export default function Navbar() {
 
         {/* Mobile: Hamburger + User */}
         <div className="flex md:hidden items-center gap-2">
+          {isAuthenticated && (
+            <Link
+              href="/inbox"
+              className="relative p-2 rounded-lg text-white/40 hover:text-white/75 transition-all"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M22 12h-6l-2 3H10l-2-3H2" />
+                <path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center rounded-full bg-purple-500 text-white text-[10px] font-bold min-w-[16px] min-h-[16px]">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
           {isAuthenticated && (
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
