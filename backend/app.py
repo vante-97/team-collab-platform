@@ -716,29 +716,43 @@ def download_file(file_id):
 @app.route("/api/stats", methods=["GET"])
 @jwt_required()
 def get_stats():
-    """获取全局统计数据"""
-    total_projects = Project.query.count()
-    total_tasks = Task.query.count()
+    """获取当前用户相关的统计数据"""
+    user_id = int(get_jwt_identity())
+
+    # 只统计当前用户参与的项目
+    member_rows = TeamMember.query.filter_by(user_id=user_id).all()
+    project_ids = [m.project_id for m in member_rows]
+
+    if not project_ids:
+        return ok({
+            "overview": {"projects": 0, "tasks": 0, "users": 0, "files": 0, "members": 0},
+            "tasks": {"todo": 0, "in_progress": 0, "done": 0},
+            "projects_status": {"planning": 0, "active": 0, "completed": 0},
+            "priority": {"low": 0, "medium": 0, "high": 0, "urgent": 0},
+        })
+
+    total_projects = Project.query.filter(Project.id.in_(project_ids)).count()
+    total_tasks = Task.query.filter(Task.project_id.in_(project_ids)).count()
     total_users = User.query.count()
-    total_files = ProjectFile.query.count()
+    total_files = ProjectFile.query.filter(ProjectFile.project_id.in_(project_ids)).count()
 
     # 任务状态分布
-    todo_count = Task.query.filter_by(status="todo").count()
-    in_progress_count = Task.query.filter_by(status="in_progress").count()
-    done_count = Task.query.filter_by(status="done").count()
+    todo_count = Task.query.filter(Task.project_id.in_(project_ids), Task.status == "todo").count()
+    in_progress_count = Task.query.filter(Task.project_id.in_(project_ids), Task.status == "in_progress").count()
+    done_count = Task.query.filter(Task.project_id.in_(project_ids), Task.status == "done").count()
 
     # 项目状态分布
-    planning_count = Project.query.filter_by(status="planning").count()
-    active_count = Project.query.filter_by(status="active").count()
-    completed_count = Project.query.filter_by(status="completed").count()
+    planning_count = Project.query.filter(Project.id.in_(project_ids), Project.status == "planning").count()
+    active_count = Project.query.filter(Project.id.in_(project_ids), Project.status == "active").count()
+    completed_count = Project.query.filter(Project.id.in_(project_ids), Project.status == "completed").count()
 
-    # 成员分布
-    total_members = TeamMember.query.count()
+    # 当前用户项目下的成员总数（按用户去重）
+    total_members = TeamMember.query.filter(TeamMember.project_id.in_(project_ids)).distinct(TeamMember.user_id).count()
 
     # 按优先级统计任务
     priority_stats = {}
     for p in ["low", "medium", "high", "urgent"]:
-        priority_stats[p] = Task.query.filter_by(priority=p).count()
+        priority_stats[p] = Task.query.filter(Task.project_id.in_(project_ids), Task.priority == p).count()
 
     return ok({
         "overview": {
