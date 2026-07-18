@@ -24,7 +24,13 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
 # ---- CORS 配置 ----
-CORS(app, origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"], supports_credentials=True,
+# 开发环境默认允许 localhost，生产环境通过 CORS_ORIGINS 环境变量配置
+_cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+if _cors_origins_env:
+    _cors_origins = [o.strip() for o in _cors_origins_env.split(",")]
+else:
+    _cors_origins = ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"]
+CORS(app, origins=_cors_origins, supports_credentials=True,
      expose_headers=["Authorization"], allow_headers=["Content-Type", "Authorization"])
 
 # ---- 简易速率限制 ----
