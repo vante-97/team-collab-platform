@@ -23,7 +23,11 @@ def create_app():
     if _cors_origins_env:
         _cors_origins = [o.strip() for o in _cors_origins_env.split(",")]
     else:
-        _cors_origins = ["http://localhost:3000"]
+        _cors_origins = [
+            "http://localhost:3000",
+            "https://team-collab-platform-ccmx19m5.edgeone.cool",
+            "https://team-collab-platform-7thc.vercel.app",
+        ]
     CORS(
         app,
         origins=_cors_origins,
