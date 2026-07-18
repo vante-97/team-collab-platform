@@ -1,18 +1,31 @@
 # 团队协作平台 (Team Collab Platform)
 
-一个基于 **Next.js 14 + Flask** 的全栈团队协作管理系统，支持项目管理、任务看板、团队协作、文件共享和数据统计。
+> **一个基于 Next.js 14 + Flask 的全栈团队协作管理系统**，支持项目管理、任务看板、团队协作、文件共享和数据统计。前后端分离架构，已完成 Vercel + EdgeOne + Railway 生产部署。
+
+## 在线演示
+
+| 环境 | 地址 | 状态 |
+|------|------|------|
+| EdgeOne（国内） | [https://team-collab-platform-ccmx19m5.edgeone.cool](https://team-collab-platform-ccmx19m5.edgeone.cool) | ✅ 在线 |
+| Vercel（境外） | [https://team-collab-platform-7thc.vercel.app](https://team-collab-platform-7thc.vercel.app) | ✅ 在线 |
+| 后端 API | [https://team-collab-platform-production.up.railway.app](https://team-collab-platform-production.up.railway.app) | ✅ 在线 |
 
 ## 技术栈
 
-| 层级 | 技术 | 说明 |
-|------|------|------|
-| 前端框架 | Next.js 14 (App Router) | React 18 + TypeScript |
-| 样式方案 | Tailwind CSS 3.4 | 暗色主题 + 玻璃态设计 |
-| 状态管理 | React Context | 认证上下文 + 自定义 Hooks |
-| 后端框架 | Flask 3.0 | Python RESTful API |
-| 数据库 | SQLite + SQLAlchemy | 轻量级关系型数据库 |
-| 认证 | JWT (Flask-JWT-Extended) | Access Token + Refresh Token |
-| 文件存储 | 本地文件系统 | 上传/下载/预览 |
+| 层级 | 技术 | 版本 | 说明 |
+|------|------|------|------|
+| 前端框架 | Next.js 14 (App Router) | 14.2.35 | React 18 + TypeScript 5 |
+| 样式方案 | Tailwind CSS | 3.4.1 | 暗色主题 + 玻璃态设计 |
+| 状态管理 | React Context | - | AuthContext + 自定义 Hooks |
+| 主题切换 | next-themes | 0.4.6 | 亮色/暗色一键切换 |
+| 后端框架 | Flask | 3.0.3 | Python RESTful API |
+| ORM | SQLAlchemy | 2.0.35 | 数据库操作 |
+| 数据库 | SQLite | - | 轻量级关系型数据库 |
+| 认证 | Flask-JWT-Extended | 4.6.0 | Access Token(1h) + Refresh Token(30d) |
+| 密码加密 | bcrypt | 4.2.0 | 密码哈希存储 |
+| 跨域 | Flask-CORS | 5.0.0 | 支持多域名白名单 |
+| 部署 | Vercel + EdgeOne + Railway | - | 前端双节点 + 后端云部署 |
+| WSGI | Gunicorn | 22.0.0 | 生产级 Python WSGI 服务器 |
 
 ## 功能模块
 
@@ -72,34 +85,53 @@
 
 ```
 team-collab-platform/
-├── backend/                  # Flask 后端
-│   ├── app.py                # 主入口（模型 + 路由 + 启动）
-│   ├── requirements.txt      # Python 依赖
-│   └── uploads/              # 文件上传目录
-├── src/                      # Next.js 前端
-│   ├── app/                  # App Router 页面
-│   │   ├── page.tsx          # 仪表盘首页
-│   │   ├── layout.tsx        # 根布局
-│   │   ├── client-layout.tsx # 客户端布局
-│   │   ├── globals.css       # 全局样式（设计系统）
-│   │   ├── login/            # 登录页
-│   │   ├── register/         # 注册页
-│   │   ├── projects/         # 项目列表 + 详情页
-│   │   ├── tasks/            # 任务看板
-│   │   ├── team/             # 团队协作
-│   │   ├── files/            # 文件管理
-│   │   └── stats/            # 数据统计
+├── backend/                    # Flask 后端
+│   ├── app.py                  # 主入口（6个模型 + 25个API路由）
+│   ├── app/                    # 模块化后端（备选架构）
+│   │   ├── __init__.py         # 应用工厂 + CORS配置
+│   │   ├── extensions.py       # 数据库/JWT扩展
+│   │   ├── models/             # 数据模型（User, Project）
+│   │   └── routes/             # 路由蓝图（auth, projects）
+│   ├── requirements.txt        # Python 依赖
+│   ├── Procfile                # Railway 部署配置
+│   ├── runtime.txt             # Python 版本声明
+│   ├── data.db                 # SQLite 数据库（自动生成）
+│   └── uploads/                # 文件上传目录
+├── src/                        # Next.js 前端
+│   ├── app/                    # App Router 页面（10个页面）
+│   │   ├── page.tsx            # 仪表盘首页
+│   │   ├── layout.tsx          # 根布局（ThemeProvider）
+│   │   ├── client-layout.tsx   # 客户端布局（AuthProvider + Navbar）
+│   │   ├── globals.css         # 全局样式（12KB设计系统）
+│   │   ├── login/page.tsx      # 登录页
+│   │   ├── register/page.tsx   # 注册页
+│   │   ├── projects/           # 项目列表 + [id] 详情页（4 Tab）
+│   │   ├── tasks/page.tsx      # 任务看板（三列拖拽）
+│   │   ├── team/page.tsx       # 团队协作
+│   │   ├── files/page.tsx      # 文件管理
+│   │   ├── stats/page.tsx      # 数据统计
+│   │   └── inbox/page.tsx      # 收件箱（邀请管理）
 │   ├── components/
-│   │   └── Navbar.tsx        # 导航栏
+│   │   └── Navbar.tsx          # 导航栏（响应式 + 通知徽章）
 │   ├── lib/
-│   │   ├── api.ts            # API 封装 + 类型定义
-│   │   └── auth-context.tsx  # 认证上下文
-│   └── middleware.ts          # 路由保护中间件
-├── start.bat                 # Windows 一键启动
-├── start.sh                  # Linux/macOS 一键启动
-├── .env.example              # 环境变量模板
-├── tailwind.config.ts        # Tailwind 配置
-└── package.json              # Node 依赖
+│   │   ├── api.ts              # API 封装 + 完整类型定义（360行）
+│   │   ├── auth.ts             # 认证工具函数
+│   │   └── auth-context.tsx    # React 认证上下文 Provider
+│   └── middleware.ts           # Next.js 路由保护中间件
+├── docs/                       # 项目文档
+│   ├── API接口文档.md          # 25个API端点完整文档
+│   ├── 数据库设计文档.md        # ER图 + 6张表结构
+│   ├── 用户操作手册.md          # 完整操作指南
+│   ├── 项目提交清单.md          # 提交材料确认
+│   └── screenshots/            # 9张界面截图
+├── start.bat                   # Windows 一键启动
+├── start.sh                    # Linux/macOS 一键启动
+├── .env.example                # 环境变量模板
+├── tailwind.config.ts          # Tailwind 配置
+├── vercel.json                 # Vercel 部署配置
+├── next.config.mjs             # Next.js 配置
+├── tsconfig.json               # TypeScript 配置
+└── package.json                # Node 依赖
 ```
 
 ## 快速开始
@@ -207,12 +239,23 @@ cp .env.example .env.local
 
 ## 部署指南
 
-### 部署架构
+### 当前部署架构
 
-- **前端**: Vercel（Next.js 静态导出 + Edge 部署）
-- **后端**: Railway / Render（Flask + Gunicorn）
-- **数据库**: SQLite（开发）/ PostgreSQL（生产，可选）
-- **文件存储**: 本地文件系统（生产可接 AWS S3 / 云存储）
+```
+用户浏览器
+    ├── 国内用户 → EdgeOne Pages (CDN加速) → 前端静态资源
+    └── 境外用户 → Vercel (Edge部署) → 前端静态资源
+                    ↓ API请求
+              Railway (Flask + Gunicorn)
+                    ↓
+              SQLite 数据库 + 本地文件存储
+```
+
+| 组件 | 平台 | 地址 |
+|------|------|------|
+| 前端（国内） | EdgeOne Pages | `https://team-collab-platform-ccmx19m5.edgeone.cool` |
+| 前端（境外） | Vercel | `https://team-collab-platform-7thc.vercel.app` |
+| 后端 | Railway | `https://team-collab-platform-production.up.railway.app` |
 
 ### 前端部署（Vercel）
 
@@ -224,6 +267,16 @@ cp .env.example .env.local
    ```
 4. 点击 Deploy，自动完成构建与部署
 
+### 前端部署（EdgeOne Pages - 国内加速）
+
+1. 访问 EdgeOne Pages 控制台，导入 GitHub 仓库
+2. 框架自动识别为 Next.js
+3. 添加环境变量：
+   ```
+   NEXT_PUBLIC_API_URL=https://team-collab-platform-production.up.railway.app
+   ```
+4. 部署完成后获得国内可访问的 `.edgeone.cool` 域名
+
 ### 后端部署（Railway）
 
 1. 访问 [railway.app](https://railway.app)，导入 GitHub 仓库
@@ -233,10 +286,10 @@ cp .env.example .env.local
    SECRET_KEY=随机生成的高强度密钥
    JWT_SECRET_KEY=随机生成的高强度密钥
    FLASK_DEBUG=false
-   CORS_ORIGINS=https://your-frontend-url.vercel.app
+   CORS_ORIGINS=https://team-collab-platform-ccmx19m5.edgeone.cool,https://team-collab-platform-7thc.vercel.app,http://localhost:3000
    ```
 4. 启动命令：`gunicorn app:app --bind 0.0.0.0:$PORT`
-5. 部署成功后，将后端地址填入 Vercel 的 `NEXT_PUBLIC_API_URL`
+5. 部署成功后，将后端地址填入前端的 `NEXT_PUBLIC_API_URL`
 
 ### 生成安全密钥
 
