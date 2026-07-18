@@ -24,14 +24,31 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
 # ---- CORS 配置 ----
-# 开发环境默认允许 localhost，生产环境通过 CORS_ORIGINS 环境变量配置
+# 动态 CORS：允许所有 railway.app 子域名和本地开发环境
 _cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-if _cors_origins_env:
-    _cors_origins = [o.strip() for o in _cors_origins_env.split(",")]
-else:
-    _cors_origins = ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"]
-CORS(app, origins=_cors_origins, supports_credentials=True,
+_cors_origins = [o.strip() for o in _cors_origins_env.split(",")] if _cors_origins_env else ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"]
+
+@app.after_request
+def set_cors_headers(response):
+    origin = request.headers.get("Origin", "")
+    if origin:
+        allowed = (
+            origin.endswith(".railway.app") or
+            origin.startswith("http://localhost") or
+            origin in _cors_origins
+        )
+        if allowed:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    return response
+
+# 保留原 CORS 导入以兼容，但实际通过 after_request 处理
+CORS(app, origins="*", supports_credentials=False,
      expose_headers=["Authorization"], allow_headers=["Content-Type", "Authorization"])
+
+
 
 # ---- 简易速率限制 ----
 RATE_LIMIT_STORE: dict[str, list[float]] = {}
