@@ -92,10 +92,11 @@ export default function LoginPage() {
 
           <div className="mt-6 pt-5 border-t border-slate-200 dark:border-white/[0.06]">
             <p className="text-slate-300 dark:text-white/90 text-base text-center mb-2">测试账号</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {[
-                { u: "testuser1", p: "123456" },
-                { u: "testuser2", p: "123456" },
+                { u: "testuser1", p: "123456", r: "owner" },
+                { u: "testuser2", p: "123456", r: "member" },
+                { u: "admin", p: "admin123", r: "admin" },
               ].map((acc) => (
                 <button
                   key={acc.u}

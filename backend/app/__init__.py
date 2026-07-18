@@ -115,4 +115,51 @@ def create_app():
         except Exception:
             db.session.rollback()
 
+        # 插入示例数据（仅在空数据库时）
+        try:
+            if User.query.count() == 0:
+                u1 = User(username="testuser1", email="testuser1@team.com")
+                u1.set_password("123456")
+                u2 = User(username="testuser2", email="testuser2@team.com")
+                u2.set_password("123456")
+                u3 = User(username="admin", email="admin@team.com")
+                u3.set_password("admin123")
+                db.session.add_all([u1, u2, u3])
+                db.session.commit()
+                app.logger.info("[DB] 示例用户已插入 (testuser1, testuser2, admin)")
+
+            if Project.query.count() == 0:
+                owner = User.query.filter_by(username="testuser1").first()
+                if owner:
+                    projects_data = [
+                        Project(name="测试样例项目", description="这是一个测试项目，用于验证前后端连通性",
+                                status="active", owner_id=owner.id),
+                        Project(name="前端重构", description="使用 Next.js 14 重构前端页面",
+                                status="planning", owner_id=owner.id),
+                        Project(name="API 文档编写", description="编写完整的 REST API 文档",
+                                status="completed", owner_id=owner.id),
+                    ]
+                    db.session.add_all(projects_data)
+                    db.session.commit()
+                    app.logger.info("[DB] 示例项目已插入。")
+
+                    admin = User.query.filter_by(username="admin").first()
+                    member = User.query.filter_by(username="testuser2").first()
+                    for proj in projects_data:
+                        existing_user_ids = {m.user_id for m in TeamMember.query.filter_by(project_id=proj.id).all()}
+                        memberships = []
+                        if owner.id not in existing_user_ids:
+                            memberships.append(TeamMember(user_id=owner.id, project_id=proj.id, role="owner"))
+                        if admin and admin.id not in existing_user_ids:
+                            memberships.append(TeamMember(user_id=admin.id, project_id=proj.id, role="admin"))
+                        if member and member.id not in existing_user_ids:
+                            memberships.append(TeamMember(user_id=member.id, project_id=proj.id, role="member"))
+                        if memberships:
+                            db.session.add_all(memberships)
+                    db.session.commit()
+                    app.logger.info("[DB] 示例成员关系已同步。")
+        except Exception:
+            db.session.rollback()
+            app.logger.exception("[DB] 示例数据初始化失败")
+
     return app

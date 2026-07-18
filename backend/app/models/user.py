@@ -1,6 +1,7 @@
 """User 模型"""
 from datetime import datetime
 from app.extensions import db
+import bcrypt
 
 
 class User(db.Model):
@@ -12,6 +13,12 @@ class User(db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def set_password(self, password: str) -> None:
+        self.password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    def check_password(self, password: str) -> bool:
+        return bcrypt.checkpw(password.encode("utf-8"), self.password_hash.encode("utf-8"))
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -19,3 +26,4 @@ class User(db.Model):
             "email": self.email,
             "created_at": self.created_at.isoformat() + "Z" if self.created_at else None,
         }
+
