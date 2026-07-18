@@ -9,6 +9,7 @@ from app.extensions import db, jwt, TOKEN_BLACKLIST
 
 def create_app():
     app = Flask(__name__)
+    app.url_map.strict_slashes = False
 
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-me")
