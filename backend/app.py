@@ -49,6 +49,27 @@ CORS(app, origins="*", supports_credentials=False,
      expose_headers=["Authorization"], allow_headers=["Content-Type", "Authorization"])
 
 
+# ---- 全局预检请求处理：在 JWT 等装饰器之前返回，避免 OPTIONS 被拦截 ----
+@app.before_request
+def handle_options():
+    if request.method == "OPTIONS":
+        response = app.make_response("")
+        origin = request.headers.get("Origin", "")
+        if origin:
+            allowed = (
+                origin.endswith(".railway.app") or
+                origin.startswith("http://localhost") or
+                origin in _cors_origins
+            )
+            if allowed:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        return response, 200
+
+
+
 
 # ---- 简易速率限制 ----
 RATE_LIMIT_STORE: dict[str, list[float]] = {}
