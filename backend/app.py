@@ -714,6 +714,21 @@ UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
+# 允许上传的文件扩展名白名单
+ALLOWED_EXTENSIONS = {
+    # 文档
+    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+    # 图片
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp",
+    # 文本/代码
+    ".txt", ".md", ".json", ".xml", ".csv", ".log", ".yaml", ".yml",
+    ".py", ".js", ".ts", ".jsx", ".tsx", ".html", ".css", ".sql",
+    # 压缩包
+    ".zip", ".tar", ".gz",
+}
+MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50MB 单文件限制
+
+
 def get_file_type(ext):
     ext = ext.lower()
     if ext in (".pdf",):
@@ -722,9 +737,23 @@ def get_file_type(ext):
         return "image"
     if ext in (".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"):
         return "doc"
-    if ext in (".txt", ".md", ".json", ".xml", ".csv", ".log"):
+    if ext in (".txt", ".md", ".json", ".xml", ".csv", ".log", ".yaml", ".yml",
+              ".py", ".js", ".ts", ".jsx", ".tsx", ".html", ".css", ".sql"):
         return "text"
+    if ext in (".zip", ".tar", ".gz"):
+        return "archive"
     return "other"
+
+
+def sanitize_filename(filename: str) -> str:
+    """移除文件名中的危险字符，防止路径遍历攻击"""
+    import re
+    # 只保留字母、数字、中文、点、下划线、连字符、空格
+    safe = re.sub(r'[^\w\u4e00-\u9fff.\- ]', '_', filename)
+    # 防止隐藏文件（以点开头）和空文件名
+    if safe.startswith('.') or not safe.strip():
+        safe = 'untitled'
+    return safe.strip()
 
 
 # ============ 文件管理 API ============
@@ -753,14 +782,30 @@ def project_files(project_id):
         if not file.filename:
             return fail("请选择要上传的文件", 400)
 
-        original_name = file.filename
+        original_name = sanitize_filename(file.filename)
         ext = os.path.splitext(original_name)[1].lower()
+
+        # 文件类型白名单校验
+        if ext not in ALLOWED_EXTENSIONS:
+            return fail(f"不支持的文件类型: {ext}。允许的类型: {', '.join(sorted(ALLOWED_EXTENSIONS))}", 400)
+
+        # 文件大小校验（读取前先检查 Content-Length 避免大文件读入内存）
+        content_length = request.content_length
+        if content_length and content_length > MAX_UPLOAD_SIZE:
+            return fail(f"文件大小超过限制（最大 {MAX_UPLOAD_SIZE // (1024*1024)}MB）", 400)
+
         # 生成唯一文件名
         unique_name = f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}_{user_id}{ext}"
         file_path = os.path.join(UPLOAD_DIR, unique_name)
 
         file.save(file_path)
         file_size = os.path.getsize(file_path)
+
+        # 保存后再次检查大小（双重保险）
+        if file_size > MAX_UPLOAD_SIZE:
+            os.remove(file_path)
+            return fail(f"文件大小超过限制（最大 {MAX_UPLOAD_SIZE // (1024*1024)}MB）", 400)
+
         file_type = get_file_type(ext)
 
         pf = ProjectFile(
