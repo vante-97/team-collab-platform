@@ -2,8 +2,7 @@
 import os
 from datetime import datetime, timedelta
 
-from flask import Flask, jsonify
-from flask_cors import CORS
+from flask import Flask, jsonify, request
 
 from app.extensions import db, jwt, TOKEN_BLACKLIST
 
@@ -25,16 +24,27 @@ def create_app():
     else:
         _cors_origins = [
             "http://localhost:3000",
-            "https://team-collab-platform-ccmx19m5.edgeone.cool",
-            "https://team-collab-platform-7thc.vercel.app",
+            "http://localhost:3001",
         ]
-    CORS(
-        app,
-        origins=_cors_origins,
-        supports_credentials=True,
-        allow_headers=["Content-Type", "Authorization"],
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    )
+
+    # 动态 CORS：通过 after_request 手动设置 Access-Control-Allow-Origin
+    # 允许所有 *.railway.app 域名（用于 Railway 前端部署）
+    @app.after_request
+    def _set_cors_headers(response):
+        origin = request.headers.get("Origin", "")
+        allowed = False
+        if not origin:
+            allowed = True
+        elif origin.endswith(".railway.app") or origin.startswith("http://localhost"):
+            allowed = True
+        elif origin in _cors_origins:
+            allowed = True
+        if allowed and origin:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        return response
 
     db.init_app(app)
     jwt.init_app(app)
