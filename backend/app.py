@@ -30,6 +30,11 @@ _cors_origins = [o.strip() for o in _cors_origins_env.split(",")] if _cors_origi
 
 @app.after_request
 def set_cors_headers(response):
+    # 强制所有 OPTIONS 预检请求返回 200，避免 CORS 失败
+    if request.method == "OPTIONS":
+        response.status_code = 200
+        response.data = b""
+
     origin = request.headers.get("Origin", "")
     if origin:
         allowed = (
@@ -43,6 +48,7 @@ def set_cors_headers(response):
             response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     return response
+
 
 # 保留原 CORS 导入以兼容；但 OPTIONS 预检由 before_request 手动处理，
 # automatic_options=False 避免 Flask-CORS 内部返回 404 覆盖我们的响应。
