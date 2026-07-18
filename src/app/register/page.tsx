@@ -75,7 +75,7 @@ export default function RegisterPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="至少6个字符"
+              placeholder="至少8个字符"
               className="glass-input"
               required
             />
