@@ -24,7 +24,13 @@ def create_app():
         _cors_origins = [o.strip() for o in _cors_origins_env.split(",")]
     else:
         _cors_origins = ["http://localhost:3000"]
-    CORS(app, origins=_cors_origins, supports_credentials=True)
+    CORS(
+        app,
+        origins=_cors_origins,
+        supports_credentials=True,
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    )
 
     db.init_app(app)
     jwt.init_app(app)
