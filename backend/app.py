@@ -44,9 +44,11 @@ def set_cors_headers(response):
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     return response
 
-# 保留原 CORS 导入以兼容，但实际通过 after_request 处理
-CORS(app, origins="*", supports_credentials=False,
+# 保留原 CORS 导入以兼容；但 OPTIONS 预检由 before_request 手动处理，
+# automatic_options=False 避免 Flask-CORS 内部返回 404 覆盖我们的响应。
+CORS(app, origins="*", supports_credentials=False, automatic_options=False,
      expose_headers=["Authorization"], allow_headers=["Content-Type", "Authorization"])
+
 
 
 # ---- 全局预检请求处理：在 JWT 等装饰器之前返回，避免 OPTIONS 被拦截 ----
