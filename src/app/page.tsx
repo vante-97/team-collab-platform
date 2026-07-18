@@ -60,10 +60,10 @@ export default function Home() {
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-emerald-400 text-sm font-medium">系统运行中</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
             {isAuthenticated ? `欢迎回来，${user?.username}` : "Team Collab Platform"}
           </h1>
-          <p className="text-white/35 text-lg max-w-md mx-auto">
+          <p className="text-slate-400 dark:text-white/95 text-lg max-w-md mx-auto">
             全栈团队协作平台 · 高效管理 · 智能追踪
           </p>
         </div>
@@ -77,19 +77,19 @@ export default function Home() {
                   <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-2xl mx-auto mb-4`}>
                     {f.icon}
                   </div>
-                  <h3 className="text-white font-semibold mb-2">{f.title}</h3>
-                  <p className="text-white/30 text-sm">{f.desc}</p>
+                  <h3 className="text-slate-900 dark:text-white font-semibold mb-2">{f.title}</h3>
+                  <p className="text-slate-400 dark:text-white/95 text-base">{f.desc}</p>
                 </div>
               ))}
             </div>
             <div className="text-center">
               <div className="flex gap-3 justify-center">
-                <Link href="/login" className="btn-primary text-sm px-8">立即登录</Link>
-                <Link href="/register" className="btn-secondary text-sm px-8">注册账号</Link>
+                <Link href="/login" className="btn-primary text-base px-8">立即登录</Link>
+                <Link href="/register" className="btn-secondary text-base px-8">注册账号</Link>
               </div>
               <div className="mt-8 flex flex-wrap justify-center gap-2">
                 {["Next.js 14", "TypeScript", "Tailwind CSS", "Flask 3.0", "SQLAlchemy", "SQLite"].map((tech) => (
-                  <span key={tech} className="px-3 py-1 rounded-full text-xs font-medium text-white/25 bg-white/[0.02] border border-white/[0.04] hover:text-white/45 hover:border-white/10 transition-colors">
+                  <span key={tech} className="px-3 py-1 rounded-full text-base font-medium text-slate-400 dark:text-white/90 bg-slate-100 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.04] hover:text-slate-400 dark:text-white/95 hover:border-white/10 transition-colors">
                     {tech}
                   </span>
                 ))}
@@ -105,15 +105,15 @@ export default function Home() {
           <div className="space-y-8">
             {/* Quick Actions */}
             <div className="glass-card p-6 animate-slide-up">
-              <h2 className="text-white font-semibold mb-4">快捷操作</h2>
+              <h2 className="text-slate-900 dark:text-white font-semibold mb-4">快捷操作</h2>
               <div className="grid gap-3 md:grid-cols-5">
                 {features.map((f) => (
                   <Link key={f.href} href={f.href}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06] transition-all duration-200 group">
+                    className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-100 dark:bg-white/[0.04] border border-transparent hover:border-slate-200 dark:border-white/[0.06] transition-all duration-200 group">
                     <div className={`w-10 h-10 rounded-xl ${f.bgIcon} flex items-center justify-center text-lg group-hover:scale-110 transition-transform duration-200`}>
                       {f.icon}
                     </div>
-                    <span className="text-white/50 text-xs group-hover:text-white/80 transition-colors">{f.title}</span>
+                    <span className="text-slate-500 dark:text-white/85 text-base group-hover:text-slate-700 dark:text-white/95 transition-colors">{f.title}</span>
                   </Link>
                 ))}
               </div>
@@ -134,8 +134,8 @@ export default function Home() {
                       {item.icon}
                     </div>
                     <div>
-                      <div className="text-white/25 text-[11px]">{item.label}</div>
-                      <div className="text-white text-xl font-bold">{item.value}</div>
+                      <div className="text-slate-400 dark:text-white/90 text-base">{item.label}</div>
+                      <div className="text-slate-900 dark:text-white text-xl font-bold">{item.value}</div>
                     </div>
                   </div>
                 ))}
@@ -147,13 +147,13 @@ export default function Home() {
               {/* Recent Projects */}
               <div className="glass-card p-6 animate-slide-up">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-white font-semibold">最近项目</h2>
-                  <Link href="/projects" className="text-purple-400/70 hover:text-purple-400 text-xs transition-colors">查看全部 →</Link>
+                  <h2 className="text-slate-900 dark:text-white font-semibold">最近项目</h2>
+                  <Link href="/projects" className="text-purple-400/70 hover:text-purple-400 text-base transition-colors">查看全部 →</Link>
                 </div>
                 {recentProjects.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-white/20 text-sm mb-3">暂无项目</p>
-                    <Link href="/projects" className="btn-primary text-xs">创建第一个项目</Link>
+                    <p className="text-slate-300 dark:text-white/90 text-base mb-3">暂无项目</p>
+                    <Link href="/projects" className="btn-primary text-base">创建第一个项目</Link>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -167,19 +167,19 @@ export default function Home() {
                       const sl = statusLabels[proj.status] || statusLabels.planning;
                       return (
                         <Link key={proj.id} href={`/projects/${proj.id}`}
-                          className="flex items-center justify-between p-3 rounded-xl hover:bg-white/[0.03] transition-colors group">
+                          className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-100 dark:bg-white/[0.03] transition-colors group">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-violet-500/20 flex items-center justify-center text-sm flex-shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-violet-500/20 flex items-center justify-center text-base flex-shrink-0">
                               📁
                             </div>
                             <div className="min-w-0">
-                              <p className="text-white/80 text-sm truncate group-hover:text-white transition-colors">{proj.name}</p>
-                              <p className="text-white/20 text-xs">
+                              <p className="text-slate-700 dark:text-white/95 text-base truncate group-hover:text-slate-900 dark:text-white transition-colors">{proj.name}</p>
+                              <p className="text-slate-300 dark:text-white/90 text-base">
                                 {new Date(proj.created_at).toLocaleDateString("zh-CN")}
                               </p>
                             </div>
                           </div>
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium flex-shrink-0 ${sl.c}`}>
+                          <span className={`px-2 py-0.5 rounded-md text-base font-medium flex-shrink-0 ${sl.c}`}>
                             {proj.status === "active" ? "进行中" : proj.status === "planning" ? "规划中" : proj.status === "completed" ? "已完成" : "已归档"}
                           </span>
                         </Link>
@@ -192,13 +192,13 @@ export default function Home() {
               {/* Recent Tasks */}
               <div className="glass-card p-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-white font-semibold">近期任务</h2>
-                  <Link href="/tasks" className="text-purple-400/70 hover:text-purple-400 text-xs transition-colors">查看全部 →</Link>
+                  <h2 className="text-slate-900 dark:text-white font-semibold">近期任务</h2>
+                  <Link href="/tasks" className="text-purple-400/70 hover:text-purple-400 text-base transition-colors">查看全部 →</Link>
                 </div>
                 {recentTasks.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-white/20 text-sm mb-3">暂无任务</p>
-                    <Link href="/tasks" className="btn-primary text-xs">创建第一个任务</Link>
+                    <p className="text-slate-300 dark:text-white/90 text-base mb-3">暂无任务</p>
+                    <Link href="/tasks" className="btn-primary text-base">创建第一个任务</Link>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -215,16 +215,16 @@ export default function Home() {
                         done: "●",
                       };
                       return (
-                        <div key={task.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-colors">
-                          <span className={`text-sm flex-shrink-0 ${task.status === "done" ? "text-emerald-400" : task.status === "in_progress" ? "text-blue-400" : "text-white/30"}`}>
+                        <div key={task.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100 dark:bg-white/[0.03] transition-colors">
+                          <span className={`text-base flex-shrink-0 ${task.status === "done" ? "text-emerald-400" : task.status === "in_progress" ? "text-blue-400" : "text-slate-400 dark:text-white/95"}`}>
                             {statusIcons[task.status] || "○"}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <p className={`text-sm truncate ${task.status === "done" ? "text-white/40 line-through" : "text-white/75"}`}>
+                            <p className={`text-base truncate ${task.status === "done" ? "text-slate-400 dark:text-white/95 line-through" : "text-slate-700 dark:text-white/95"}`}>
                               {task.title}
                             </p>
                           </div>
-                          <span className={`text-[10px] font-medium flex-shrink-0 ${priColors[task.priority] || "text-slate-400"}`}>
+                          <span className={`text-base font-medium flex-shrink-0 ${priColors[task.priority] || "text-slate-400"}`}>
                             {task.priority === "urgent" ? "紧急" : task.priority === "high" ? "高" : task.priority === "medium" ? "中" : "低"}
                           </span>
                         </div>
@@ -238,7 +238,7 @@ export default function Home() {
             {/* Tech stack footer */}
             <div className="flex flex-wrap justify-center gap-2 pt-4">
               {["Next.js 14", "TypeScript", "Tailwind CSS", "Flask 3.0", "SQLAlchemy", "SQLite"].map((tech) => (
-                <span key={tech} className="px-3 py-1 rounded-full text-xs font-medium text-white/20 bg-white/[0.02] border border-white/[0.04] hover:text-white/40 hover:border-white/10 transition-colors">
+                <span key={tech} className="px-3 py-1 rounded-full text-base font-medium text-slate-300 dark:text-white/90 bg-slate-100 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.04] hover:text-slate-400 dark:text-white/95 hover:border-white/10 transition-colors">
                   {tech}
                 </span>
               ))}

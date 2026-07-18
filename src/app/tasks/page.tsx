@@ -174,13 +174,13 @@ export default function TasksPage() {
             <select
               value={selectedProject ?? ""}
               onChange={(e) => setSelectedProject(Number(e.target.value))}
-              className="glass-select text-sm"
+              className="glass-select text-base"
             >
               {projects.map((p) => (
                 <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>
               ))}
             </select>
-            <button onClick={() => setShowCreate(true)} className="btn-primary text-sm whitespace-nowrap min-w-[110px]">+ 新建任务</button>
+            <button onClick={() => setShowCreate(true)} className="btn-primary text-base whitespace-nowrap min-w-[110px]">+ 新建任务</button>
           </div>
         </div>
 
@@ -188,18 +188,18 @@ export default function TasksPage() {
         {showCreate && (
           <div className="modal-overlay" onClick={() => setShowCreate(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h2 className="text-lg font-semibold text-white mb-5">新建任务</h2>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5">新建任务</h2>
               <input type="text" placeholder="任务标题" value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)} className="glass-input mb-3" autoFocus />
               <textarea placeholder="任务描述（可选）" value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)} rows={2} className="glass-input mb-3 resize-none" />
 
               <div className="mb-3">
-                <label className="block text-white/40 text-sm mb-2">优先级</label>
+                <label className="block text-slate-400 dark:text-white/95 text-base mb-2">优先级</label>
                 <div className="flex gap-2">
                   {Object.entries(PRIORITY_MAP).map(([key, val]) => (
                     <button key={key} type="button" onClick={() => setNewPriority(key)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${val.color} ${
+                      className={`px-3 py-1.5 rounded-lg text-base font-medium border transition-all ${val.color} ${
                         newPriority === key ? "ring-2 ring-purple-500/40 border-transparent" : "border-transparent opacity-50 hover:opacity-80"
                       }`}>{val.label}</button>
                   ))}
@@ -208,9 +208,9 @@ export default function TasksPage() {
 
               {members.length > 0 && (
                 <div className="mb-5">
-                  <label className="block text-white/40 text-sm mb-2">指派给</label>
+                  <label className="block text-slate-400 dark:text-white/95 text-base mb-2">指派给</label>
                   <select value={newAssignee ?? ""} onChange={(e) => setNewAssignee(e.target.value ? Number(e.target.value) : undefined)}
-                    className="glass-select text-sm">
+                    className="glass-select text-base">
                     <option value="" className="bg-slate-800">不分配</option>
                     {members.map((m) => (
                       <option key={m.user_id} value={m.user_id} className="bg-slate-800">{m.username}</option>
@@ -220,9 +220,9 @@ export default function TasksPage() {
               )}
 
               <div className="flex gap-3 justify-end">
-                {createError && <p className="text-red-400 text-sm flex-1">{createError}</p>}
-                <button onClick={() => setShowCreate(false)} className="btn-secondary text-sm">取消</button>
-                <button onClick={handleCreate} disabled={!newTitle.trim() || creating} className="btn-primary text-sm">
+                {createError && <p className="text-red-400 text-base flex-1">{createError}</p>}
+                <button onClick={() => setShowCreate(false)} className="btn-secondary text-base">取消</button>
+                <button onClick={handleCreate} disabled={!newTitle.trim() || creating} className="btn-primary text-base">
                   {creating ? "创建中..." : "确认创建"}
                 </button>
               </div>
@@ -234,7 +234,7 @@ export default function TasksPage() {
         {error && (
           <div className="p-6 glass-card text-center mb-6 animate-fade-in">
             <p className="text-red-400 mb-3">{error}</p>
-            <button onClick={fetchTasks} className="btn-primary text-sm">重试</button>
+            <button onClick={fetchTasks} className="btn-primary text-base">重试</button>
           </div>
         )}
 
@@ -242,7 +242,7 @@ export default function TasksPage() {
         {loading && (
           <div className="flex items-center justify-center py-20 animate-fade-in">
             <div className="spinner" />
-            <span className="ml-3 text-white/25 text-sm">加载中...</span>
+            <span className="ml-3 text-slate-400 dark:text-white/90 text-base">加载中...</span>
           </div>
         )}
 
@@ -261,9 +261,9 @@ export default function TasksPage() {
 
                   <div className="flex items-center justify-between px-5 pt-5 pb-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-white/50 text-sm">{col.icon}</span>
-                      <h3 className="text-white/70 font-medium text-sm">{col.label}</h3>
-                      <span className="text-white/15 text-xs ml-1">{colTasks.length}</span>
+                      <span className="text-slate-500 dark:text-white/85 text-base">{col.icon}</span>
+                      <h3 className="text-slate-600 dark:text-white/95 font-medium text-base">{col.label}</h3>
+                      <span className="text-slate-300 dark:text-white/90 text-base ml-1">{colTasks.length}</span>
                     </div>
                   </div>
 
@@ -272,14 +272,14 @@ export default function TasksPage() {
                       const pri = PRIORITY_MAP[task.priority] || PRIORITY_MAP.medium;
                       return (
                         <div key={task.id} draggable onDragStart={() => handleDragStart(task)}
-                          className="glass-card p-4 cursor-grab active:cursor-grabbing hover:border-white/[0.15] transition-all duration-200 group">
+                          className="glass-card p-4 cursor-grab active:cursor-grabbing hover:border-slate-300 dark:border-white/[0.15] transition-all duration-200 group">
 
                           <div className="flex items-start justify-between gap-2 mb-2">
-                            <h4 className="text-white/85 text-sm font-medium leading-snug flex-1">{task.title}</h4>
-                            <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium ${pri.color}`}>{pri.label}</span>
+                            <h4 className="text-white/85 text-base font-medium leading-snug flex-1">{task.title}</h4>
+                            <span className={`shrink-0 px-1.5 py-0.5 rounded text-base font-medium ${pri.color}`}>{pri.label}</span>
                           </div>
                           {task.description && (
-                            <p className="text-white/20 text-xs mb-2 line-clamp-2">{task.description}</p>
+                            <p className="text-slate-300 dark:text-white/90 text-base mb-2 line-clamp-2">{task.description}</p>
                           )}
                           <div className="flex items-center justify-between">
                             {/* Assignee selector */}
@@ -288,17 +288,17 @@ export default function TasksPage() {
                                 value={task.assignee_id ?? ""}
                                 onChange={(e) => handleAssign(task.id, e.target.value ? Number(e.target.value) : undefined)}
                                 onClick={(e) => e.stopPropagation()}
-                                className="text-[10px] bg-transparent text-white/25 hover:text-white/50 border-none outline-none cursor-pointer appearance-none pr-3"
+                                className="text-base bg-transparent text-slate-400 dark:text-white/90 hover:text-slate-500 dark:text-white/85 border-none outline-none cursor-pointer appearance-none pr-3"
                               >
-                                <option value="" className="bg-slate-800 text-white/40">未分配</option>
+                                <option value="" className="bg-slate-800 text-slate-400 dark:text-white/95">未分配</option>
                                 {members.map((m) => (
-                                  <option key={m.user_id} value={m.user_id} className="bg-slate-800 text-white/70">{m.username}</option>
+                                  <option key={m.user_id} value={m.user_id} className="bg-slate-800 text-slate-600 dark:text-white/95">{m.username}</option>
                                 ))}
                               </select>
-                              <span className="absolute right-0 top-1/2 -translate-y-1/2 text-white/15 pointer-events-none text-[8px]">▼</span>
+                              <span className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-300 dark:text-white/90 pointer-events-none text-[8px]">▼</span>
                             </div>
                             <button onClick={() => handleDelete(task.id)}
-                              className="opacity-0 group-hover:opacity-100 text-[10px] text-red-400/50 hover:text-red-400 transition-all">
+                              className="opacity-0 group-hover:opacity-100 text-base text-red-400/50 hover:text-red-400 transition-all">
                               删除
                             </button>
                           </div>
@@ -306,7 +306,7 @@ export default function TasksPage() {
                       );
                     })}
                     {colTasks.length === 0 && (
-                      <div className="text-center py-10 text-white/8 text-sm">
+                      <div className="text-center py-10 text-slate-200 dark:text-white/8 text-base">
                         拖拽任务到此处
                       </div>
                     )}

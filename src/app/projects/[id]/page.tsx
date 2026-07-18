@@ -304,7 +304,7 @@ export default function ProjectDetailPage() {
         <div className="glass-card p-8 text-center">
           <div className="text-4xl mb-3">🔍</div>
           <p className="text-red-400 mb-4">{error || "项目不存在"}</p>
-          <Link href="/projects" className="btn-primary text-sm">返回项目列表</Link>
+          <Link href="/projects" className="btn-primary text-base">返回项目列表</Link>
         </div>
       </div>
     );
@@ -337,10 +337,10 @@ export default function ProjectDetailPage() {
         )}
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm mb-6 animate-fade-in">
-          <Link href="/projects" className="text-white/30 hover:text-white/60 transition-colors">项目</Link>
-          <span className="text-white/15">/</span>
-          <span className="text-white/60">{project.name}</span>
+        <div className="flex items-center gap-2 text-base mb-6 animate-fade-in">
+          <Link href="/projects" className="text-slate-400 dark:text-white/95 hover:text-slate-500 dark:text-white/90 transition-colors">项目</Link>
+          <span className="text-slate-300 dark:text-white/90">/</span>
+          <span className="text-slate-500 dark:text-white/90">{project.name}</span>
         </div>
 
         {/* Header */}
@@ -368,20 +368,20 @@ export default function ProjectDetailPage() {
                   })}
                 </div>
                 <div className="flex gap-2 pt-1">
-                  <button onClick={handleSaveEdit} disabled={!editName.trim()} className="btn-primary text-sm">保存</button>
-                  <button onClick={() => setEditing(false)} className="btn-secondary text-sm">取消</button>
+                  <button onClick={handleSaveEdit} disabled={!editName.trim()} className="btn-primary text-base">保存</button>
+                  <button onClick={() => setEditing(false)} className="btn-secondary text-base">取消</button>
                 </div>
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl font-bold text-white">{project.name}</h1>
+                  <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{project.name}</h1>
                   <span className={`status-badge ${statusInfo.color}`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`} />{statusInfo.label}
                   </span>
                 </div>
-                <p className="text-white/30 text-sm">{project.description || "暂无描述"}</p>
-                <div className="flex items-center gap-4 mt-3 text-xs text-white/20">
+                <p className="text-slate-400 dark:text-white/95 text-base">{project.description || "暂无描述"}</p>
+                <div className="flex items-center gap-4 mt-3 text-base text-slate-300 dark:text-white/90">
                   <span>创建于 {new Date(project.created_at).toLocaleDateString("zh-CN")}</span>
                   {project.owner_name && <span>创建者: {project.owner_name}</span>}
                 </div>
@@ -391,8 +391,8 @@ export default function ProjectDetailPage() {
           <div className="flex gap-2 flex-shrink-0">
             {!editing && (
               <>
-                <button onClick={startEdit} className="btn-secondary text-sm">编辑</button>
-                <button onClick={handleDeleteProject} className="btn-danger text-sm">删除</button>
+                <button onClick={startEdit} className="btn-secondary text-base">编辑</button>
+                <button onClick={handleDeleteProject} className="btn-danger text-base">删除</button>
               </>
             )}
           </div>
@@ -404,16 +404,16 @@ export default function ProjectDetailPage() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-all duration-200 border-b-2 -mb-[1px] ${
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-base font-medium transition-all duration-200 border-b-2 -mb-[1px] ${
                 activeTab === tab.key
                   ? "text-purple-300 border-purple-500"
-                  : "text-white/30 border-transparent hover:text-white/50"
+                  : "text-slate-400 dark:text-white/95 border-transparent hover:text-slate-500 dark:text-white/85"
               }`}
             >
-              <span className="text-xs">{tab.icon}</span>
+              <span className="text-base">{tab.icon}</span>
               {tab.label}
               {tab.count !== undefined && tab.count > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-white/[0.04] text-[10px] text-white/30">{tab.count}</span>
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.04] text-base text-slate-400 dark:text-white/95">{tab.count}</span>
               )}
             </button>
           ))}
@@ -455,8 +455,8 @@ export default function ProjectDetailPage() {
 
               {/* Progress bar */}
               <div className="glass-card p-5 md:col-span-2 lg:col-span-4">
-                <h3 className="text-white font-medium mb-3 text-sm">任务进度</h3>
-                <div className="flex h-3 rounded-full overflow-hidden bg-white/[0.04]">
+                <h3 className="text-slate-900 dark:text-white font-medium mb-3 text-base">任务进度</h3>
+                <div className="flex h-3 rounded-full overflow-hidden bg-slate-100 dark:bg-white/[0.04]">
                   {tasks.length > 0 ? (
                     <>
                       <div className="bg-yellow-500/60 transition-all duration-500" style={{ width: `${(todoTasks.length / tasks.length) * 100}%` }} />
@@ -464,10 +464,10 @@ export default function ProjectDetailPage() {
                       <div className="bg-emerald-500/60 transition-all duration-500" style={{ width: `${(doneTasks.length / tasks.length) * 100}%` }} />
                     </>
                   ) : (
-                    <div className="bg-white/[0.03] w-full" />
+                    <div className="bg-slate-100 dark:bg-white/[0.03] w-full" />
                   )}
                 </div>
-                <div className="flex justify-between mt-2 text-xs">
+                <div className="flex justify-between mt-2 text-base">
                   <span className="text-yellow-400/60">待办 {todoTasks.length}</span>
                   <span className="text-blue-400/60">进行中 {inProgressTasks.length}</span>
                   <span className="text-emerald-400/60">已完成 {doneTasks.length}</span>
@@ -480,28 +480,28 @@ export default function ProjectDetailPage() {
           {activeTab === "tasks" && (
             <>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-white/25 text-sm">共 {tasks.length} 个任务</p>
-                <button onClick={() => setShowCreateTask(true)} className="btn-primary text-sm">+ 新建任务</button>
+                <p className="text-slate-400 dark:text-white/90 text-base">共 {tasks.length} 个任务</p>
+                <button onClick={() => setShowCreateTask(true)} className="btn-primary text-base">+ 新建任务</button>
               </div>
               {showCreateTask && (
                 <div className="modal-overlay" onClick={() => setShowCreateTask(false)}>
                   <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                    <h2 className="text-lg font-semibold text-white mb-4">新建任务</h2>
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">新建任务</h2>
                     <input type="text" placeholder="任务标题" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} className="glass-input mb-3" autoFocus />
                     <div className="mb-4">
-                      <label className="block text-white/40 text-sm mb-2">优先级</label>
+                      <label className="block text-slate-400 dark:text-white/95 text-base mb-2">优先级</label>
                       <div className="flex gap-2">
                         {Object.entries(PRIORITY_MAP).map(([k, v]) => (
                           <button key={k} onClick={() => setNewTaskPriority(k)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${v.color} ${newTaskPriority === k ? "ring-2 ring-purple-500/40 border-transparent" : "border-transparent opacity-50 hover:opacity-80"}`}>
+                            className={`px-3 py-1.5 rounded-lg text-base font-medium border ${v.color} ${newTaskPriority === k ? "ring-2 ring-purple-500/40 border-transparent" : "border-transparent opacity-50 hover:opacity-80"}`}>
                             {v.label}
                           </button>
                         ))}
                       </div>
                     </div>
                     <div className="flex gap-3 justify-end">
-                      <button onClick={() => setShowCreateTask(false)} className="btn-secondary text-sm">取消</button>
-                      <button onClick={handleCreateTask} disabled={!newTaskTitle.trim() || creatingTask} className="btn-primary text-sm">
+                      <button onClick={() => setShowCreateTask(false)} className="btn-secondary text-base">取消</button>
+                      <button onClick={handleCreateTask} disabled={!newTaskTitle.trim() || creatingTask} className="btn-primary text-base">
                         {creatingTask ? "创建中..." : "确认创建"}
                       </button>
                     </div>
@@ -523,8 +523,8 @@ export default function ProjectDetailPage() {
                   ].map((col) => (
                     <div key={col.key} className={`rounded-xl border ${col.color} p-4 min-h-[200px]`}>
                       <div className="flex items-center gap-2 mb-3">
-                        <h3 className="text-white/70 font-medium text-sm">{col.label}</h3>
-                        <span className="text-white/20 text-xs">{col.tasks.length}</span>
+                        <h3 className="text-slate-600 dark:text-white/95 font-medium text-base">{col.label}</h3>
+                        <span className="text-slate-300 dark:text-white/90 text-base">{col.tasks.length}</span>
                       </div>
                       <div className="space-y-2">
                         {col.tasks.map((task) => {
@@ -532,28 +532,28 @@ export default function ProjectDetailPage() {
                           return (
                             <div key={task.id} className="glass-card p-3 group">
                               <div className="flex items-start justify-between gap-2">
-                                <span className="text-white/80 text-sm flex-1">{task.title}</span>
-                                <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium ${pri.color}`}>{pri.label}</span>
+                                <span className="text-slate-700 dark:text-white/95 text-base flex-1">{task.title}</span>
+                                <span className={`shrink-0 px-1.5 py-0.5 rounded text-base font-medium ${pri.color}`}>{pri.label}</span>
                               </div>
                               <div className="flex items-center justify-between mt-2">
                                 <div className="flex gap-1">
                                   {col.key !== "todo" && (
-                                    <button onClick={() => handleMoveTask(task.id, "todo")} className="text-white/15 hover:text-yellow-400 text-[10px] px-1.5 py-0.5 rounded hover:bg-white/[0.04] transition-colors">← 待办</button>
+                                    <button onClick={() => handleMoveTask(task.id, "todo")} className="text-slate-300 dark:text-white/90 hover:text-yellow-400 text-base px-1.5 py-0.5 rounded hover:bg-slate-100 dark:bg-white/[0.04] transition-colors">← 待办</button>
                                   )}
                                   {col.key !== "in_progress" && (
-                                    <button onClick={() => handleMoveTask(task.id, "in_progress")} className="text-white/15 hover:text-blue-400 text-[10px] px-1.5 py-0.5 rounded hover:bg-white/[0.04] transition-colors">进行中</button>
+                                    <button onClick={() => handleMoveTask(task.id, "in_progress")} className="text-slate-300 dark:text-white/90 hover:text-blue-400 text-base px-1.5 py-0.5 rounded hover:bg-slate-100 dark:bg-white/[0.04] transition-colors">进行中</button>
                                   )}
                                   {col.key !== "done" && (
-                                    <button onClick={() => handleMoveTask(task.id, "done")} className="text-white/15 hover:text-emerald-400 text-[10px] px-1.5 py-0.5 rounded hover:bg-white/[0.04] transition-colors">完成 ✓</button>
+                                    <button onClick={() => handleMoveTask(task.id, "done")} className="text-slate-300 dark:text-white/90 hover:text-emerald-400 text-base px-1.5 py-0.5 rounded hover:bg-slate-100 dark:bg-white/[0.04] transition-colors">完成 ✓</button>
                                   )}
                                 </div>
-                                <button onClick={() => handleDeleteTask(task.id)} className="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-400 text-[10px] transition-all">删除</button>
+                                <button onClick={() => handleDeleteTask(task.id)} className="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-400 text-base transition-all">删除</button>
                               </div>
                             </div>
                           );
                         })}
                         {col.tasks.length === 0 && (
-                          <div className="text-center py-8 text-white/10 text-sm">暂无任务</div>
+                          <div className="text-center py-8 text-slate-200 dark:text-white/10 text-base">暂无任务</div>
                         )}
                       </div>
                     </div>
@@ -567,27 +567,27 @@ export default function ProjectDetailPage() {
           {activeTab === "members" && (
             <>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-white/25 text-sm">共 {members.length} 位成员</p>
+                <p className="text-slate-400 dark:text-white/90 text-base">共 {members.length} 位成员</p>
                 {canManage && (
-                  <button onClick={() => { setShowInviteMember(true); setInviteMemberError(""); setInviteMemberSuccess(""); }} className="btn-primary text-sm whitespace-nowrap flex-shrink-0 min-w-fit">+ 邀请成员</button>
+                  <button onClick={() => { setShowInviteMember(true); setInviteMemberError(""); setInviteMemberSuccess(""); }} className="btn-primary text-base whitespace-nowrap flex-shrink-0 min-w-fit">+ 邀请成员</button>
                 )}
               </div>
               {showInviteMember && (
                 <div className="modal-overlay" onClick={() => setShowInviteMember(false)}>
                   <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                    <h2 className="text-lg font-semibold text-white mb-2">邀请团队成员</h2>
-                    <p className="text-white/30 text-xs mb-4">输入用户名发送邀请，对方在收件箱中确认后即可加入项目</p>
-                    {inviteMemberError && <div className="mb-3 p-3 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-sm">{inviteMemberError}</div>}
-                    {inviteMemberSuccess && <div className="mb-3 p-3 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-emerald-400 text-sm">{inviteMemberSuccess}</div>}
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">邀请团队成员</h2>
+                    <p className="text-slate-400 dark:text-white/95 text-base mb-4">输入用户名发送邀请，对方在收件箱中确认后即可加入项目</p>
+                    {inviteMemberError && <div className="mb-3 p-3 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-base">{inviteMemberError}</div>}
+                    {inviteMemberSuccess && <div className="mb-3 p-3 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-emerald-400 text-base">{inviteMemberSuccess}</div>}
                     <input type="text" placeholder="输入用户名" value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} className="glass-input mb-3" autoFocus />
                     <div className="mb-5">
-                      <label className="block text-white/40 text-sm mb-2">角色</label>
+                      <label className="block text-slate-400 dark:text-white/95 text-base mb-2">角色</label>
                       <div className="flex gap-2">
                         {["admin", "member", "viewer"].map((r) => {
                           const ri = ROLE_MAP[r];
                           return (
                             <button key={r} type="button" onClick={() => setNewMemberRole(r)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${ri.color} ${newMemberRole === r ? "ring-2 ring-purple-500/40" : "opacity-50 hover:opacity-80"}`}>
+                              className={`px-3 py-1.5 rounded-lg text-base font-medium border ${ri.color} ${newMemberRole === r ? "ring-2 ring-purple-500/40" : "opacity-50 hover:opacity-80"}`}>
                               {ri.label}
                             </button>
                           );
@@ -595,8 +595,8 @@ export default function ProjectDetailPage() {
                       </div>
                     </div>
                     <div className="flex gap-3 justify-end">
-                      <button onClick={() => setShowInviteMember(false)} className="btn-secondary text-sm">取消</button>
-                      <button onClick={handleInviteMember} disabled={!newMemberName.trim() || invitingMember} className="btn-primary text-sm">
+                      <button onClick={() => setShowInviteMember(false)} className="btn-secondary text-base">取消</button>
+                      <button onClick={handleInviteMember} disabled={!newMemberName.trim() || invitingMember} className="btn-primary text-base">
                         {invitingMember ? "发送中..." : "发送邀请"}
                       </button>
                     </div>
@@ -605,15 +605,15 @@ export default function ProjectDetailPage() {
               )}
               {sentInvitations.length > 0 && (
                 <div className="mb-6">
-                  <p className="text-white/30 text-xs mb-2">已发送邀请</p>
+                  <p className="text-slate-400 dark:text-white/95 text-base mb-2">已发送邀请</p>
                   <div className="glass-card divide-y divide-white/[0.03] overflow-hidden">
                     {sentInvitations.map((inv) => (
                       <div key={inv.id} className="flex items-center justify-between px-4 py-3">
-                        <div className="text-sm text-white/70">
+                        <div className="text-base text-slate-600 dark:text-white/95">
                           <span className="font-medium">{inv.invitee_name}</span>
-                          <span className="text-white/30 ml-2">{ROLE_MAP[inv.role]?.label || inv.role}</span>
+                          <span className="text-slate-400 dark:text-white/95 ml-2">{ROLE_MAP[inv.role]?.label || inv.role}</span>
                         </div>
-                        <span className="text-xs text-yellow-400/80 bg-yellow-400/10 px-2 py-1 rounded-full">等待确认</span>
+                        <span className="text-base text-yellow-400/80 bg-yellow-400/10 px-2 py-1 rounded-full">等待确认</span>
                       </div>
                     ))}
                   </div>
@@ -625,7 +625,7 @@ export default function ProjectDetailPage() {
                   <div className="empty-state-title">暂无成员</div>
                   <div className="empty-state-desc">邀请成员开始协作</div>
                   {canManage && (
-                    <button onClick={() => { setShowInviteMember(true); setInviteMemberError(""); setInviteMemberSuccess(""); }} className="btn-primary text-sm">邀请第一个成员</button>
+                    <button onClick={() => { setShowInviteMember(true); setInviteMemberError(""); setInviteMemberSuccess(""); }} className="btn-primary text-base">邀请第一个成员</button>
                   )}
                 </div>
               ) : (
@@ -633,17 +633,17 @@ export default function ProjectDetailPage() {
                   {members.map((member) => {
                     const ri = ROLE_MAP[member.role] || ROLE_MAP.member;
                     return (
-                      <div key={member.id} className="flex items-center justify-between px-6 py-4 hover:bg-white/[0.01] transition-colors">
+                      <div key={member.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 dark:bg-white/[0.01] transition-colors">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400/20 to-violet-400/20 flex items-center justify-center text-purple-300 text-sm font-bold">
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400/20 to-violet-400/20 flex items-center justify-center text-purple-300 text-base font-bold">
                             {member.username?.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-white/80 text-sm font-medium">
+                            <p className="text-slate-700 dark:text-white/95 text-base font-medium">
                               {member.username}
-                              {member.username === user?.username && <span className="text-white/20 text-xs ml-1.5">(你)</span>}
+                              {member.username === user?.username && <span className="text-slate-300 dark:text-white/90 text-base ml-1.5">(你)</span>}
                             </p>
-                            <p className="text-white/20 text-xs">{member.email}</p>
+                            <p className="text-slate-300 dark:text-white/90 text-base">{member.email}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -664,14 +664,14 @@ export default function ProjectDetailPage() {
           {activeTab === "files" && (
             <>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-white/25 text-sm">共 {files.length} 个文件 · {formatSize(files.reduce((s, f) => s + f.file_size, 0))}</p>
-                <label className="btn-primary cursor-pointer text-sm">
+                <p className="text-slate-400 dark:text-white/90 text-base">共 {files.length} 个文件 · {formatSize(files.reduce((s, f) => s + f.file_size, 0))}</p>
+                <label className="btn-primary cursor-pointer text-base">
                   {uploading ? "上传中..." : "+ 上传文件"}
                   <input type="file" className="hidden" onChange={handleUploadFile} disabled={uploading} />
                 </label>
               </div>
               {fileMsg && (
-                <div className={`mb-3 p-3 rounded-xl text-sm ${fileMsg.includes("失败") ? "bg-red-500/5 border border-red-500/15 text-red-400" : "bg-emerald-500/5 border border-emerald-500/15 text-emerald-400"}`}>{fileMsg}</div>
+                <div className={`mb-3 p-3 rounded-xl text-base ${fileMsg.includes("失败") ? "bg-red-500/5 border border-red-500/15 text-red-400" : "bg-emerald-500/5 border border-emerald-500/15 text-emerald-400"}`}>{fileMsg}</div>
               )}
               {files.length === 0 ? (
                 <div className="empty-state">
@@ -682,17 +682,17 @@ export default function ProjectDetailPage() {
               ) : (
                 <div className="glass-card overflow-hidden">
                   {files.map((file) => (
-                    <div key={file.id} className="flex items-center justify-between px-6 py-3.5 border-b border-white/[0.02] hover:bg-white/[0.01] transition-colors">
+                    <div key={file.id} className="flex items-center justify-between px-6 py-3.5 border-b border-white/[0.02] hover:bg-slate-50 dark:bg-white/[0.01] transition-colors">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <span className="text-xl flex-shrink-0">
                           {file.file_type === "pdf" ? "📄" : file.file_type === "image" ? "🖼️" : file.file_type === "doc" ? "📝" : "📁"}
                         </span>
                         <div className="min-w-0">
                           <button onClick={() => window.open(getFileDownloadUrl(file.id), "_blank")}
-                            className="text-white/80 text-sm hover:text-purple-400 truncate transition-colors text-left block w-full">
+                            className="text-slate-700 dark:text-white/95 text-base hover:text-purple-400 truncate transition-colors text-left block w-full">
                             {file.original_name}
                           </button>
-                          <span className="text-white/20 text-[11px]">{formatSize(file.file_size)} · {file.uploader_name} · {new Date(file.created_at).toLocaleDateString("zh-CN")}</span>
+                          <span className="text-slate-300 dark:text-white/90 text-base">{formatSize(file.file_size)} · {file.uploader_name} · {new Date(file.created_at).toLocaleDateString("zh-CN")}</span>
                         </div>
                       </div>
                       <button onClick={() => handleDeleteFile(file.id, file.original_name)} className="btn-danger">删除</button>

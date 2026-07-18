@@ -6,6 +6,7 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
@@ -22,6 +23,26 @@ const config: Config = {
           700: "#6b21e3",
           800: "#5a1cbf",
           900: "#4b199c",
+        },
+        surface: {
+          deep: "var(--bg-deep)",
+          primary: "var(--bg-primary)",
+          card: "var(--bg-card)",
+        },
+        border: {
+          subtle: "var(--border-subtle)",
+          DEFAULT: "var(--border-default)",
+        },
+        text: {
+          primary: "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+          muted: "var(--text-muted)",
+        },
+        accent: {
+          success: "var(--success-400)",
+          warning: "var(--warning-400)",
+          danger: "var(--danger-400)",
+          info: "var(--info-400)",
         },
       },
       animation: {

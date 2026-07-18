@@ -103,28 +103,28 @@ export default function InboxPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 bg-white/[0.02] rounded-xl border border-white/[0.06] animate-fade-in">
+        <div className="flex gap-1 mb-6 p-1 bg-slate-100 dark:bg-white/[0.02] rounded-xl border border-slate-200 dark:border-white/[0.06] animate-fade-in">
           <button
             onClick={() => setTab("received")}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-4 rounded-lg text-base font-medium transition-all ${
               tab === "received"
                 ? "bg-purple-500/20 text-purple-300"
-                : "text-white/35 hover:text-white/60"
+                : "text-slate-400 dark:text-white/95 hover:text-slate-500 dark:text-white/90"
             }`}
           >
             收到的邀请
             {pendingCount > 0 && (
-              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-purple-500 text-white text-[10px] font-bold">
+              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-purple-500 text-slate-900 dark:text-white text-base font-bold">
                 {pendingCount}
               </span>
             )}
           </button>
           <button
             onClick={() => setTab("sent")}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-4 rounded-lg text-base font-medium transition-all ${
               tab === "sent"
                 ? "bg-purple-500/20 text-purple-300"
-                : "text-white/35 hover:text-white/60"
+                : "text-slate-400 dark:text-white/95 hover:text-slate-500 dark:text-white/90"
             }`}
           >
             发出的邀请
@@ -135,7 +135,7 @@ export default function InboxPage() {
         {loading && (
           <div className="flex items-center justify-center py-20 animate-fade-in">
             <div className="spinner" />
-            <span className="ml-3 text-white/25 text-sm">加载中...</span>
+            <span className="ml-3 text-slate-400 dark:text-white/90 text-base">加载中...</span>
           </div>
         )}
 
@@ -160,9 +160,9 @@ export default function InboxPage() {
                         {inv.inviter_name?.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-white/80 text-sm">
+                        <p className="text-slate-700 dark:text-white/95 text-base">
                           <span className="text-purple-400 font-medium">{inv.inviter_name}</span>
-                          <span className="text-white/40"> 邀请你加入 </span>
+                          <span className="text-slate-400 dark:text-white/95"> 邀请你加入 </span>
                           <Link
                             href={`/projects/${inv.project_id}`}
                             className="text-purple-300 hover:text-purple-200 underline underline-offset-2"
@@ -170,7 +170,7 @@ export default function InboxPage() {
                             {inv.project_name}
                           </Link>
                         </p>
-                        <p className="text-white/25 text-xs mt-1">
+                        <p className="text-slate-400 dark:text-white/90 text-base mt-1">
                           角色：{ROLE_LABELS[inv.role] || inv.role} ·{" "}
                           {new Date(inv.created_at).toLocaleDateString("zh-CN")}
                         </p>
@@ -182,14 +182,14 @@ export default function InboxPage() {
                           <button
                             onClick={() => handleRespond(inv.id, "accept")}
                             disabled={responding === inv.id}
-                            className="px-4 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-sm rounded-lg font-medium transition-all border border-emerald-500/20 disabled:opacity-50"
+                            className="px-4 py-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-base rounded-lg font-medium transition-all border border-emerald-500/20 disabled:opacity-50"
                           >
                             {responding === inv.id ? "..." : "接受"}
                           </button>
                           <button
                             onClick={() => handleRespond(inv.id, "reject")}
                             disabled={responding === inv.id}
-                            className="px-4 py-1.5 bg-white/[0.04] hover:bg-red-500/10 text-white/40 hover:text-red-400 text-sm rounded-lg transition-all border border-white/[0.06] disabled:opacity-50"
+                            className="px-4 py-1.5 bg-slate-100 dark:bg-white/[0.04] hover:bg-red-500/10 text-slate-400 dark:text-white/95 hover:text-red-400 text-base rounded-lg transition-all border border-slate-200 dark:border-white/[0.06] disabled:opacity-50"
                           >
                             拒绝
                           </button>
@@ -228,10 +228,10 @@ export default function InboxPage() {
                         {inv.invitee_name?.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-white/80 text-sm">
-                          <span className="text-white/40">邀请 </span>
+                        <p className="text-slate-700 dark:text-white/95 text-base">
+                          <span className="text-slate-400 dark:text-white/95">邀请 </span>
                           <span className="text-blue-400 font-medium">{inv.invitee_name}</span>
-                          <span className="text-white/40"> 加入 </span>
+                          <span className="text-slate-400 dark:text-white/95"> 加入 </span>
                           <Link
                             href={`/projects/${inv.project_id}`}
                             className="text-purple-300 hover:text-purple-200 underline underline-offset-2"
@@ -239,7 +239,7 @@ export default function InboxPage() {
                             {inv.project_name}
                           </Link>
                         </p>
-                        <p className="text-white/25 text-xs mt-1">
+                        <p className="text-slate-400 dark:text-white/90 text-base mt-1">
                           角色：{ROLE_LABELS[inv.role] || inv.role} ·{" "}
                           {new Date(inv.created_at).toLocaleDateString("zh-CN")}
                         </p>

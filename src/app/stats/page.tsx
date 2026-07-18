@@ -8,7 +8,7 @@ import Link from "next/link";
 function ProgressBar({ value, max, color }: { value: number; max: number; color: string }) {
   const pct = max > 0 ? (value / max) * 100 : 0;
   return (
-    <div className="w-full bg-white/[0.04] rounded-full h-2">
+    <div className="w-full bg-slate-100 dark:bg-white/[0.04] rounded-full h-2">
       <div
         className={`h-2 rounded-full transition-all duration-700 ${color}`}
         style={{ width: `${pct}%` }}
@@ -24,8 +24,8 @@ function StatCard({ label, value, icon, color, tip }: { label: string; value: nu
         {icon}
       </div>
       <div>
-        <div className="text-white/30 text-xs">{label}</div>
-        <div className="text-white text-2xl font-bold">{value}</div>
+        <div className="text-slate-400 dark:text-white/95 text-base">{label}</div>
+        <div className="text-slate-900 dark:text-white text-2xl font-bold">{value}</div>
       </div>
     </div>
   );
@@ -64,7 +64,7 @@ export default function StatsPage() {
       <div className="page-bg flex items-center justify-center">
         <div className="glass-card p-8 text-center">
           <p className="text-red-400 mb-4">{error}</p>
-          <button onClick={loadStats} className="btn-primary text-sm">重新加载</button>
+          <button onClick={loadStats} className="btn-primary text-base">重新加载</button>
         </div>
       </div>
     );
@@ -87,8 +87,8 @@ export default function StatsPage() {
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="mb-8 animate-fade-in">
-          <h1 className="text-3xl font-bold text-white">数据统计</h1>
-          <p className="text-white/35 text-sm mt-1">团队工作效率概览</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">数据统计</h1>
+          <p className="text-slate-400 dark:text-white/95 text-base mt-1">团队工作效率概览</p>
         </div>
 
         {/* Overview Cards */}
@@ -103,68 +103,68 @@ export default function StatsPage() {
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {/* Task Status */}
           <div className="glass-card p-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-            <h2 className="text-white font-semibold mb-5">任务状态分布</h2>
+            <h2 className="text-slate-900 dark:text-white font-semibold mb-5">任务状态分布</h2>
             <div className="space-y-4">
               <div>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-white/40">待办</span>
+                <div className="flex justify-between text-base mb-1.5">
+                  <span className="text-slate-400 dark:text-white/95">待办</span>
                   <span className="text-yellow-400">{stats.tasks.todo}</span>
                 </div>
                 <ProgressBar value={stats.tasks.todo} max={taskTotal} color="bg-yellow-400" />
               </div>
               <div>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-white/40">进行中</span>
+                <div className="flex justify-between text-base mb-1.5">
+                  <span className="text-slate-400 dark:text-white/95">进行中</span>
                   <span className="text-blue-400">{stats.tasks.in_progress}</span>
                 </div>
                 <ProgressBar value={stats.tasks.in_progress} max={taskTotal} color="bg-blue-400" />
               </div>
               <div>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-white/40">已完成</span>
+                <div className="flex justify-between text-base mb-1.5">
+                  <span className="text-slate-400 dark:text-white/95">已完成</span>
                   <span className="text-emerald-400">{stats.tasks.done}</span>
                 </div>
                 <ProgressBar value={stats.tasks.done} max={taskTotal} color="bg-emerald-400" />
               </div>
             </div>
             {/* Donut-like summary */}
-            <div className="mt-5 pt-4 border-t border-white/[0.04] flex justify-center gap-6">
+            <div className="mt-5 pt-4 border-t border-slate-200 dark:border-white/[0.04] flex justify-center gap-6">
               <div className="text-center">
                 <div className="text-emerald-400 text-xl font-bold">
                   {taskTotal > 0 ? Math.round((stats.tasks.done / taskTotal) * 100) : 0}%
                 </div>
-                <div className="text-white/25 text-xs">完成率</div>
+                <div className="text-slate-400 dark:text-white/90 text-base">完成率</div>
               </div>
               <div className="text-center">
                 <div className="text-blue-400 text-xl font-bold">
                   {taskTotal > 0 ? Math.round((stats.tasks.in_progress / taskTotal) * 100) : 0}%
                 </div>
-                <div className="text-white/25 text-xs">进行率</div>
+                <div className="text-slate-400 dark:text-white/90 text-base">进行率</div>
               </div>
             </div>
           </div>
 
           {/* Project Status */}
           <div className="glass-card p-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-            <h2 className="text-white font-semibold mb-5">项目状态分布</h2>
+            <h2 className="text-slate-900 dark:text-white font-semibold mb-5">项目状态分布</h2>
             <div className="space-y-4">
               <div>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-white/40">规划中</span>
+                <div className="flex justify-between text-base mb-1.5">
+                  <span className="text-slate-400 dark:text-white/95">规划中</span>
                   <span className="text-purple-400">{stats.projects_status.planning}</span>
                 </div>
                 <ProgressBar value={stats.projects_status.planning} max={projTotal} color="bg-purple-400" />
               </div>
               <div>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-white/40">进行中</span>
+                <div className="flex justify-between text-base mb-1.5">
+                  <span className="text-slate-400 dark:text-white/95">进行中</span>
                   <span className="text-blue-400">{stats.projects_status.active}</span>
                 </div>
                 <ProgressBar value={stats.projects_status.active} max={projTotal} color="bg-blue-400" />
               </div>
               <div>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-white/40">已完成</span>
+                <div className="flex justify-between text-base mb-1.5">
+                  <span className="text-slate-400 dark:text-white/95">已完成</span>
                   <span className="text-emerald-400">{stats.projects_status.completed}</span>
                 </div>
                 <ProgressBar value={stats.projects_status.completed} max={projTotal} color="bg-emerald-400" />
@@ -175,7 +175,7 @@ export default function StatsPage() {
 
         {/* Priority Distribution */}
         <div className="glass-card p-6 mb-8 animate-slide-up" style={{ animationDelay: "0.3s" }}>
-          <h2 className="text-white font-semibold mb-5">任务优先级分布</h2>
+          <h2 className="text-slate-900 dark:text-white font-semibold mb-5">任务优先级分布</h2>
           <div className="grid grid-cols-4 gap-4">
             {[
               { key: "urgent", label: "紧急", color: "text-red-400", bg: "bg-red-400" },
@@ -187,7 +187,7 @@ export default function StatsPage() {
               return (
                 <div key={item.key} className="text-center">
                   <div className={`text-2xl font-bold ${item.color}`}>{val}</div>
-                  <div className="text-white/25 text-xs mt-1">{item.label}</div>
+                  <div className="text-slate-400 dark:text-white/90 text-base mt-1">{item.label}</div>
                   <div className="mt-2">
                     <ProgressBar value={val} max={priorityTotal} color={item.bg} />
                   </div>
@@ -199,10 +199,10 @@ export default function StatsPage() {
 
         {/* Quick Links */}
         <div className="flex gap-3 justify-center animate-slide-up" style={{ animationDelay: "0.4s" }}>
-          <Link href="/projects" className="btn-secondary text-sm">项目管理</Link>
-          <Link href="/tasks" className="btn-secondary text-sm">任务看板</Link>
-          <Link href="/files" className="btn-secondary text-sm">文件管理</Link>
-          <Link href="/team" className="btn-secondary text-sm">团队协作</Link>
+          <Link href="/projects" className="btn-secondary text-base">项目管理</Link>
+          <Link href="/tasks" className="btn-secondary text-base">任务看板</Link>
+          <Link href="/files" className="btn-secondary text-base">文件管理</Link>
+          <Link href="/team" className="btn-secondary text-base">团队协作</Link>
         </div>
       </div>
     </div>

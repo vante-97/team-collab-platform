@@ -89,19 +89,19 @@ export default function ProjectsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8 animate-fade-in">
           <div>
-            <h1 className="text-2xl font-bold text-white">项目管理</h1>
-            <p className="text-white/30 text-sm mt-1">共 {projects.length} 个项目</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">项目管理</h1>
+            <p className="text-slate-400 dark:text-white/95 text-base mt-1">共 {projects.length} 个项目</p>
           </div>
-          <button onClick={() => setShowCreate(true)} className="btn-primary text-sm">
+          <button onClick={() => setShowCreate(true)} className="btn-primary text-base">
             + 创建项目
           </button>
         </div>
 
         {/* Create Modal */}
         {showCreate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowCreate(false)}>
-            <div className="glass-card p-6 w-full max-w-md mx-4 border-white/[0.12] animate-scale-in" onClick={(e) => e.stopPropagation()}>
-              <h2 className="text-lg font-semibold text-white mb-5">创建新项目</h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowCreate(false)}>
+            <div className="glass-card p-6 w-full max-w-md mx-4 border-slate-300 dark:border-white/[0.12] animate-scale-in" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5">创建新项目</h2>
               <input
                 type="text"
                 placeholder="项目名称"
@@ -118,7 +118,7 @@ export default function ProjectsPage() {
                 className="glass-input mb-3 resize-none"
               />
               <div className="mb-5">
-                <label className="block text-white/50 text-sm mb-2">初始状态</label>
+                <label className="block text-slate-500 dark:text-white/85 text-base mb-2">初始状态</label>
                 <div className="flex gap-2">
                   {["planning", "active"].map((s) => {
                     const st = STATUS_MAP[s];
@@ -127,7 +127,7 @@ export default function ProjectsPage() {
                         key={s}
                         type="button"
                         onClick={() => setNewStatus(s)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${st.color} ${newStatus === s ? "ring-2 ring-purple-500/40" : "opacity-60 hover:opacity-100"}`}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium border transition-all ${st.color} ${newStatus === s ? "ring-2 ring-purple-500/40" : "opacity-60 hover:opacity-100"}`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
                         {st.label}
@@ -137,8 +137,8 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <div className="flex gap-3 justify-end">
-                <button onClick={() => setShowCreate(false)} className="btn-secondary text-sm">取消</button>
-                <button onClick={handleCreate} disabled={!newName.trim() || creating} className="btn-primary text-sm">
+                <button onClick={() => setShowCreate(false)} className="btn-secondary text-base">取消</button>
+                <button onClick={handleCreate} disabled={!newName.trim() || creating} className="btn-primary text-base">
                   {creating ? "创建中..." : "确认创建"}
                 </button>
               </div>
@@ -150,7 +150,7 @@ export default function ProjectsPage() {
         {loading && (
           <div className="flex items-center justify-center py-20 animate-fade-in">
             <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-            <span className="ml-3 text-white/30 text-sm">加载中...</span>
+            <span className="ml-3 text-slate-400 dark:text-white/95 text-base">加载中...</span>
           </div>
         )}
 
@@ -158,7 +158,7 @@ export default function ProjectsPage() {
         {error && !loading && (
           <div className="p-8 glass-card text-center animate-fade-in">
             <p className="text-red-400 mb-4">{error}</p>
-            <button onClick={fetchProjects} className="btn-primary text-sm">重试</button>
+            <button onClick={fetchProjects} className="btn-primary text-base">重试</button>
           </div>
         )}
 
@@ -166,7 +166,7 @@ export default function ProjectsPage() {
         {!loading && !error && projects.length === 0 && (
           <div className="text-center py-20 animate-fade-in">
             <div className="text-5xl mb-4 opacity-30">📁</div>
-            <p className="text-white/25 text-lg mb-6">还没有项目，创建一个开始吧</p>
+            <p className="text-slate-400 dark:text-white/90 text-lg mb-6">还没有项目，创建一个开始吧</p>
             <button onClick={() => setShowCreate(true)} className="btn-primary">
               创建第一个项目
             </button>
@@ -182,20 +182,20 @@ export default function ProjectsPage() {
                 <div key={proj.id} className="glass-card p-5 group transition-all duration-300 hover:-translate-y-0.5">
                   <Link href={`/projects/${proj.id}`} className="block">
                     <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-white font-semibold truncate flex-1 mr-2 hover:text-purple-300 transition-colors">{proj.name}</h3>
+                      <h3 className="text-slate-900 dark:text-white font-semibold truncate flex-1 mr-2 hover:text-purple-300 transition-colors">{proj.name}</h3>
                       <span className={`status-badge shrink-0 ${statusInfo.color}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`} />
                         {statusInfo.label}
                       </span>
                     </div>
                     {proj.description ? (
-                      <p className="text-white/30 text-sm mb-4 line-clamp-2">{proj.description}</p>
+                      <p className="text-slate-400 dark:text-white/95 text-base mb-4 line-clamp-2">{proj.description}</p>
                     ) : (
-                      <p className="text-white/10 text-sm mb-4 italic">暂无描述</p>
+                      <p className="text-slate-200 dark:text-white/10 text-base mb-4 italic">暂无描述</p>
                     )}
                   </Link>
-                  <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
-                    <span className="text-white/20 text-xs">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-white/[0.04]">
+                    <span className="text-slate-300 dark:text-white/90 text-base">
                       {new Date(proj.created_at).toLocaleDateString("zh-CN")}
                     </span>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
@@ -208,13 +208,13 @@ export default function ProjectsPage() {
                           setNewStatus(proj.status);
                           setShowEdit(true);
                         }}
-                        className="text-white/30 hover:text-white/70 text-xs px-2 py-1 rounded hover:bg-white/[0.04] transition-colors"
+                        className="text-slate-400 dark:text-white/95 hover:text-slate-600 dark:text-white/95 text-base px-2 py-1 rounded hover:bg-slate-100 dark:bg-white/[0.04] transition-colors"
                       >
                         编辑
                       </button>
                       <button
                         onClick={(e) => { e.preventDefault(); handleDelete(proj.id, proj.name); }}
-                        className="text-red-400/50 hover:text-red-400 text-xs px-2 py-1 rounded hover:bg-red-400/5 transition-colors"
+                        className="text-red-400/50 hover:text-red-400 text-base px-2 py-1 rounded hover:bg-red-400/5 transition-colors"
                       >
                         删除
                       </button>
@@ -228,9 +228,9 @@ export default function ProjectsPage() {
 
         {/* Edit Modal */}
         {showEdit && editingProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowEdit(false)}>
-            <div className="glass-card p-6 w-full max-w-md mx-4 border-white/[0.12] animate-scale-in" onClick={(e) => e.stopPropagation()}>
-              <h2 className="text-lg font-semibold text-white mb-5">编辑项目</h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowEdit(false)}>
+            <div className="glass-card p-6 w-full max-w-md mx-4 border-slate-300 dark:border-white/[0.12] animate-scale-in" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5">编辑项目</h2>
               <input
                 type="text" placeholder="项目名称" value={newName}
                 onChange={(e) => setNewName(e.target.value)}
@@ -242,7 +242,7 @@ export default function ProjectsPage() {
                 rows={3} className="glass-input mb-3 resize-none"
               />
               <div className="mb-5">
-                <label className="block text-white/50 text-sm mb-2">状态</label>
+                <label className="block text-slate-500 dark:text-white/85 text-base mb-2">状态</label>
                 <div className="flex gap-2">
                   {Object.entries(STATUS_MAP).map(([key, val]) => (
                     <button key={key} type="button" onClick={() => setNewStatus(key)}
@@ -253,7 +253,7 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <div className="flex gap-3 justify-end">
-                <button onClick={() => setShowEdit(false)} className="btn-secondary text-sm">取消</button>
+                <button onClick={() => setShowEdit(false)} className="btn-secondary text-base">取消</button>
                 <button
                   onClick={async () => {
                     if (!newName.trim() || !editingProject) return;
@@ -268,7 +268,7 @@ export default function ProjectsPage() {
                     }
                   }}
                   disabled={!newName.trim()}
-                  className="btn-primary text-sm"
+                  className="btn-primary text-base"
                 >
                   保存修改
                 </button>

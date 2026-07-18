@@ -139,7 +139,7 @@ export default function TeamPage() {
             <select
               value={selectedProject ?? ""}
               onChange={(e) => setSelectedProject(Number(e.target.value))}
-              className="glass-select text-sm min-w-[140px]"
+              className="glass-select text-base min-w-[140px]"
             >
               {projects.map((p) => (
                 <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>
@@ -148,7 +148,7 @@ export default function TeamPage() {
             {canManage && (
               <button
                 onClick={() => { setShowInvite(true); setInviteError(""); setInviteSuccess(""); }}
-                className="btn-primary text-sm whitespace-nowrap flex-shrink-0 min-w-fit"
+                className="btn-primary text-base whitespace-nowrap flex-shrink-0 min-w-fit"
               >
                 + 邀请成员
               </button>
@@ -157,18 +157,18 @@ export default function TeamPage() {
         </div>
 
         {/* Permission Hint */}
-        <div className="mb-6 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] animate-fade-in">
-          <div className="flex items-center gap-2 text-sm text-white/50">
+        <div className="mb-6 p-4 rounded-xl bg-slate-100 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06] animate-fade-in">
+          <div className="flex items-center gap-2 text-base text-slate-500 dark:text-white/85">
             <span className="text-purple-400">🔒</span>
             <span>
               当前身份：
-              <span className="text-white/70 font-medium ml-1">
+              <span className="text-slate-600 dark:text-white/95 font-medium ml-1">
                 {ROLE_MAP[currentUserMember?.role]?.label || "成员"}
               </span>
               {canManage ? (
                 <span className="ml-2 text-emerald-400/80">可邀请新成员、修改角色、移除成员</span>
               ) : (
-                <span className="ml-2 text-white/30">仅可查看成员列表</span>
+                <span className="ml-2 text-slate-400 dark:text-white/95">仅可查看成员列表</span>
               )}
             </span>
           </div>
@@ -178,15 +178,15 @@ export default function TeamPage() {
         {showInvite && (
           <div className="modal-overlay" onClick={() => setShowInvite(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h2 className="text-lg font-semibold text-white mb-5">邀请团队成员</h2>
-              <p className="text-white/30 text-xs mb-4">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-5">邀请团队成员</h2>
+              <p className="text-slate-400 dark:text-white/95 text-base mb-4">
                 输入用户名发送邀请，对方在收件箱中确认后即可加入项目
               </p>
               {inviteError && (
-                <div className="mb-3 p-3 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-sm">{inviteError}</div>
+                <div className="mb-3 p-3 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-base">{inviteError}</div>
               )}
               {inviteSuccess && (
-                <div className="mb-3 p-3 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-emerald-400 text-sm">{inviteSuccess}</div>
+                <div className="mb-3 p-3 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-emerald-400 text-base">{inviteSuccess}</div>
               )}
               <input
                 type="text"
@@ -197,7 +197,7 @@ export default function TeamPage() {
                 autoFocus
               />
               <div className="mb-5">
-                <label className="block text-white/40 text-sm mb-2">角色</label>
+                <label className="block text-slate-400 dark:text-white/95 text-base mb-2">角色</label>
                 <div className="flex gap-2">
                   {["admin", "member", "viewer"].map((r) => {
                     const roleInfo = ROLE_MAP[r];
@@ -206,7 +206,7 @@ export default function TeamPage() {
                         key={r}
                         type="button"
                         onClick={() => setInviteRole(r)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${roleInfo.color} ${
+                        className={`px-3 py-1.5 rounded-lg text-base font-medium border transition-all ${roleInfo.color} ${
                           inviteRole === r ? "ring-2 ring-purple-500/40" : "opacity-50 hover:opacity-80"
                         }`}
                       >
@@ -217,11 +217,11 @@ export default function TeamPage() {
                 </div>
               </div>
               <div className="flex gap-3 justify-end">
-                <button onClick={() => setShowInvite(false)} className="btn-secondary text-sm">取消</button>
+                <button onClick={() => setShowInvite(false)} className="btn-secondary text-base">取消</button>
                 <button
                   onClick={handleInvite}
                   disabled={!inviteUsername.trim() || inviting}
-                  className="btn-primary text-sm"
+                  className="btn-primary text-base"
                 >
                   {inviting ? "发送中..." : "发送邀请"}
                 </button>
@@ -234,7 +234,7 @@ export default function TeamPage() {
         {error && (
           <div className="p-6 glass-card text-center mb-6 animate-fade-in">
             <p className="text-red-400 mb-3">{error}</p>
-            <button onClick={fetchMembers} className="btn-primary text-sm">重试</button>
+            <button onClick={fetchMembers} className="btn-primary text-base">重试</button>
           </div>
         )}
 
@@ -242,7 +242,7 @@ export default function TeamPage() {
         {loading && (
           <div className="flex items-center justify-center py-20 animate-fade-in">
             <div className="spinner" />
-            <span className="ml-3 text-white/25 text-sm">加载中...</span>
+            <span className="ml-3 text-slate-400 dark:text-white/90 text-base">加载中...</span>
           </div>
         )}
 
@@ -255,7 +255,7 @@ export default function TeamPage() {
             {canManage && (
               <button
                 onClick={() => { setShowInvite(true); setInviteError(""); setInviteSuccess(""); }}
-                className="btn-primary text-sm"
+                className="btn-primary text-base"
               >
                 邀请第一个成员
               </button>
@@ -266,7 +266,7 @@ export default function TeamPage() {
         {/* Members List */}
         {!loading && !error && members.length > 0 && (
           <div className="glass-card divide-y divide-white/[0.03] overflow-hidden animate-slide-up">
-            <div className="hidden md:grid grid-cols-[1fr_auto_auto] gap-4 px-6 py-3 text-white/20 text-xs font-medium">
+            <div className="hidden md:grid grid-cols-[1fr_auto_auto] gap-4 px-6 py-3 text-slate-300 dark:text-white/90 text-base font-medium">
               <span>成员</span>
               <span>角色</span>
               <span className="text-right">操作</span>
@@ -275,17 +275,17 @@ export default function TeamPage() {
               const roleInfo = ROLE_MAP[member.role] || ROLE_MAP.member;
               const isMe = member.username === user?.username;
               return (
-                <div key={member.id} className="flex flex-col md:grid md:grid-cols-[1fr_auto_auto] gap-2 md:gap-4 px-4 md:px-6 py-4 items-start md:items-center hover:bg-white/[0.01] transition-colors">
+                <div key={member.id} className="flex flex-col md:grid md:grid-cols-[1fr_auto_auto] gap-2 md:gap-4 px-4 md:px-6 py-4 items-start md:items-center hover:bg-slate-50 dark:bg-white/[0.01] transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400/20 to-violet-400/20 flex items-center justify-center text-purple-300 text-sm font-bold shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400/20 to-violet-400/20 flex items-center justify-center text-purple-300 text-base font-bold shrink-0">
                       {member.username?.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-white/80 text-sm font-medium truncate">
+                      <p className="text-slate-700 dark:text-white/95 text-base font-medium truncate">
                         {member.username}
-                        {isMe && <span className="text-white/15 text-xs ml-1.5">(你)</span>}
+                        {isMe && <span className="text-slate-300 dark:text-white/90 text-base ml-1.5">(你)</span>}
                       </p>
-                      <p className="text-white/15 text-xs truncate">{member.email}</p>
+                      <p className="text-slate-300 dark:text-white/90 text-base truncate">{member.email}</p>
                     </div>
                   </div>
                   <div className="ml-12 md:ml-0">
@@ -293,7 +293,7 @@ export default function TeamPage() {
                       <select
                         value={member.role}
                         onChange={(e) => handleRoleChange(member.id, e.target.value as TeamMember["role"])}
-                        className="text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-white/60 focus:outline-none focus:border-purple-500/40 transition-colors cursor-pointer"
+                        className="text-base bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-lg px-2.5 py-1.5 text-slate-500 dark:text-white/90 focus:outline-none focus:border-purple-500/40 transition-colors cursor-pointer"
                       >
                         <option value="admin" className="bg-slate-800">管理员</option>
                         <option value="member" className="bg-slate-800">成员</option>

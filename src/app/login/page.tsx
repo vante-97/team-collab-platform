@@ -35,27 +35,27 @@ export default function LoginPage() {
       <div className="w-full max-w-md mx-4 animate-scale-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 items-center justify-center text-white text-2xl font-bold mb-4 shadow-xl shadow-purple-500/20">
+          <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 items-center justify-center text-slate-900 dark:text-white text-2xl font-bold mb-4 shadow-xl shadow-purple-500/20">
             T
           </div>
-          <h1 className="text-2xl font-bold text-white">欢迎回来</h1>
-          <p className="text-white/35 mt-1.5 text-sm">登录你的 TeamCollab 账号</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">欢迎回来</h1>
+          <p className="text-slate-400 dark:text-white/95 mt-1.5 text-base">登录你的 TeamCollab 账号</p>
         </div>
 
         <form onSubmit={handleSubmit} className="glass-card p-8">
           {error && (
-            <div className="mb-4 p-3.5 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-sm animate-fade-in">
+            <div className="mb-4 p-3.5 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-base animate-fade-in">
               {error}
             </div>
           )}
           {success && (
-            <div className="mb-4 p-3.5 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-emerald-400 text-sm animate-fade-in">
+            <div className="mb-4 p-3.5 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-emerald-400 text-base animate-fade-in">
               {success}
             </div>
           )}
 
           <div className="mb-4">
-            <label className="block text-white/40 text-sm mb-2">用户名或邮箱</label>
+            <label className="block text-slate-400 dark:text-white/95 text-base mb-2">用户名或邮箱</label>
             <input
               type="text"
               value={username}
@@ -68,7 +68,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-white/40 text-sm mb-2">密码</label>
+            <label className="block text-slate-400 dark:text-white/95 text-base mb-2">密码</label>
             <input
               type="password"
               value={password}
@@ -83,15 +83,15 @@ export default function LoginPage() {
             {loading ? "登录中..." : "登录"}
           </button>
 
-          <p className="text-center text-white/20 text-sm mt-5">
+          <p className="text-center text-slate-300 dark:text-white/90 text-base mt-5">
             还没有账号？{" "}
             <Link href="/register" className="text-purple-400 hover:text-purple-300 transition-colors">
               立即注册
             </Link>
           </p>
 
-          <div className="mt-6 pt-5 border-t border-white/[0.06]">
-            <p className="text-white/15 text-xs text-center mb-2">测试账号</p>
+          <div className="mt-6 pt-5 border-t border-slate-200 dark:border-white/[0.06]">
+            <p className="text-slate-300 dark:text-white/90 text-base text-center mb-2">测试账号</p>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { u: "testuser1", p: "123456" },
@@ -101,7 +101,7 @@ export default function LoginPage() {
                   key={acc.u}
                   type="button"
                   onClick={() => { setUsername(acc.u); setPassword(acc.p); }}
-                  className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.04] text-white/25 text-xs hover:text-white/55 hover:border-white/10 transition-all text-center"
+                  className="p-2 rounded-lg bg-slate-100 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.04] text-slate-400 dark:text-white/90 text-base hover:text-slate-500 dark:text-white/85 hover:border-white/10 transition-all text-center"
                 >
                   {acc.u}
                 </button>

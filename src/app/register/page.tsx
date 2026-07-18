@@ -30,22 +30,22 @@ export default function RegisterPage() {
     <div className="page-bg flex items-center justify-center">
       <div className="w-full max-w-md mx-4 animate-scale-in">
         <div className="text-center mb-8">
-          <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 items-center justify-center text-white text-2xl font-bold mb-4 shadow-xl shadow-purple-500/20">
+          <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 items-center justify-center text-slate-900 dark:text-white text-2xl font-bold mb-4 shadow-xl shadow-purple-500/20">
             T
           </div>
-          <h1 className="text-2xl font-bold text-white">创建账号</h1>
-          <p className="text-white/35 mt-1.5 text-sm">加入 TeamCollab 开始协作</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">创建账号</h1>
+          <p className="text-slate-400 dark:text-white/95 mt-1.5 text-base">加入 TeamCollab 开始协作</p>
         </div>
 
         <form onSubmit={handleSubmit} className="glass-card p-8">
           {error && (
-            <div className="mb-4 p-3.5 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-sm animate-fade-in">
+            <div className="mb-4 p-3.5 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400 text-base animate-fade-in">
               {error}
             </div>
           )}
 
           <div className="mb-4">
-            <label className="block text-white/40 text-sm mb-2">用户名</label>
+            <label className="block text-slate-400 dark:text-white/95 text-base mb-2">用户名</label>
             <input
               type="text"
               value={username}
@@ -58,7 +58,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-white/40 text-sm mb-2">邮箱</label>
+            <label className="block text-slate-400 dark:text-white/95 text-base mb-2">邮箱</label>
             <input
               type="email"
               value={email}
@@ -70,7 +70,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-white/40 text-sm mb-2">密码</label>
+            <label className="block text-slate-400 dark:text-white/95 text-base mb-2">密码</label>
             <input
               type="password"
               value={password}
@@ -82,7 +82,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-white/40 text-sm mb-2">确认密码</label>
+            <label className="block text-slate-400 dark:text-white/95 text-base mb-2">确认密码</label>
             <input
               type="password"
               value={confirmPassword}
@@ -97,7 +97,7 @@ export default function RegisterPage() {
             {loading ? "注册中..." : "注册"}
           </button>
 
-          <p className="text-center text-white/20 text-sm mt-5">
+          <p className="text-center text-slate-300 dark:text-white/90 text-base mt-5">
             已有账号？{" "}
             <Link href="/login" className="text-purple-400 hover:text-purple-300 transition-colors">
               立即登录
