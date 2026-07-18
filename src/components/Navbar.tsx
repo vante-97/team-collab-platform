@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getUnreadCount } from "@/lib/api";
 
 const navLinks = [
@@ -21,24 +21,24 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const fetchUnread = () => {
+  const fetchUnread = useCallback(() => {
     if (!isAuthenticated) return;
     getUnreadCount().then((res) => {
       if (res.code === 200 && res.data) {
         setUnreadCount(res.data.count);
       }
     }).catch(() => {});
-  };
+  }, [isAuthenticated]);
 
   useEffect(() => {
     fetchUnread();
-  }, [isAuthenticated]);
+  }, [fetchUnread]);
 
   useEffect(() => {
     const handler = () => fetchUnread();
     window.addEventListener("inbox-refresh", handler);
     return () => window.removeEventListener("inbox-refresh", handler);
-  }, [isAuthenticated]);
+  }, [fetchUnread]);
 
   // 项目详情页也标记"项目"为活跃
   const isActive = (href: string) => {

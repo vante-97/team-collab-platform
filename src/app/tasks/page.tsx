@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRequireAuth, useAuth } from "@/lib/auth-context";
+import { useRequireAuth } from "@/lib/auth-context";
 import { getProjects, getTasks, createTask, moveTask, deleteTask, updateTask, getMembers, Project, Task, TeamMember } from "@/lib/api";
 
 const COLUMNS = [
@@ -19,7 +19,6 @@ const PRIORITY_MAP: Record<string, { label: string; color: string }> = {
 
 export default function TasksPage() {
   const { isAuthenticated, loading: authLoading } = useRequireAuth();
-  const { user } = useAuth();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);

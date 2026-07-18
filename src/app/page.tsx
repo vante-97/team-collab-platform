@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { getStats, getProjects, getTasks, type StatsData, type Project, type Task } from "@/lib/api";
+import { getStats, getProjects, type StatsData, type Project, type Task } from "@/lib/api";
 import Link from "next/link";
 
 const features = [

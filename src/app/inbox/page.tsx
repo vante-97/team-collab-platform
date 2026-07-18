@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRequireAuth, useAuth } from "@/lib/auth-context";
-import { getInvitations, respondInvitation, getUnreadCount, Invitation } from "@/lib/api";
+import { useRequireAuth } from "@/lib/auth-context";
+import { getInvitations, respondInvitation, Invitation } from "@/lib/api";
 import Link from "next/link";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -25,7 +25,6 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function InboxPage() {
   const { isAuthenticated, loading: authLoading } = useRequireAuth();
-  const { user } = useAuth();
 
   const [received, setReceived] = useState<Invitation[]>([]);
   const [sent, setSent] = useState<Invitation[]>([]);

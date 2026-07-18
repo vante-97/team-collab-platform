@@ -33,7 +33,7 @@ function getToken(): string | null {
   return localStorage.getItem("access_token");
 }
 
-function getRefreshToken(): string | null {
+export function getRefreshToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("refresh_token");
 }
