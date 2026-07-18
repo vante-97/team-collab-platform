@@ -18,6 +18,7 @@ def create_app():
     app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "jwt-secret-change-me")
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
+    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
 
     _cors_origins_env = os.environ.get("CORS_ORIGINS", "")
     if _cors_origins_env:
@@ -28,23 +29,40 @@ def create_app():
             "http://localhost:3001",
         ]
 
-    # 动态 CORS：通过 after_request 手动设置 Access-Control-Allow-Origin
-    # 允许所有 *.railway.app 域名（用于 Railway 前端部署）
+    # ---- 全局 OPTIONS 预检处理：必须在任何路由/JWT 之前 ----
+    @app.before_request
+    def _handle_options():
+        if request.method == "OPTIONS":
+            origin = request.headers.get("Origin", "")
+            allowed = (
+                origin.endswith(".railway.app") or
+                origin.startswith("http://localhost") or
+                origin in _cors_origins
+            )
+            if allowed:
+                resp = app.make_response("")
+                resp.status_code = 200
+                resp.headers["Access-Control-Allow-Origin"] = origin
+                resp.headers["Access-Control-Allow-Credentials"] = "true"
+                resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+                resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+                return resp
+
+    # ---- 动态 CORS：通过 after_request 手动设置 Access-Control-Allow-Origin ----
     @app.after_request
     def _set_cors_headers(response):
         origin = request.headers.get("Origin", "")
-        allowed = False
-        if not origin:
-            allowed = True
-        elif origin.endswith(".railway.app") or origin.startswith("http://localhost"):
-            allowed = True
-        elif origin in _cors_origins:
-            allowed = True
-        if allowed and origin:
-            response.headers["Access-Control-Allow-Origin"] = origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        if origin:
+            allowed = (
+                origin.endswith(".railway.app") or
+                origin.startswith("http://localhost") or
+                origin in _cors_origins
+            )
+            if allowed:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
         return response
 
     db.init_app(app)
@@ -54,10 +72,17 @@ def create_app():
     def _check_blocklist(jwt_header, jwt_payload):
         return jwt_payload["jti"] in TOKEN_BLACKLIST
 
+    # 注册所有蓝图
     from app.routes.auth import auth_bp
     from app.routes.projects import projects_bp
+    from app.routes.tasks import tasks_bp
+    from app.routes.members import members_bp
+    from app.routes.files import files_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(projects_bp, url_prefix="/api/projects")
+    app.register_blueprint(tasks_bp)
+    app.register_blueprint(members_bp)
+    app.register_blueprint(files_bp)
 
     @app.route("/")
     def home():
@@ -73,7 +98,7 @@ def create_app():
         return jsonify({"code": 200, "message": "success", "data": {"status": "healthy", "database": "connected" if db_ok else "disconnected"}, "timestamp": datetime.utcnow().isoformat() + "Z"})
 
     with app.app_context():
-        from app.models import User, Project  # noqa
+        from app.models import User, Project, Task, TeamMember, Invitation, ProjectFile  # noqa
         db.create_all()
 
     return app
