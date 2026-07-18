@@ -1,14 +1,13 @@
 # 团队协作平台 (Team Collab Platform)
 
-> **一个基于 Next.js 14 + Flask 的全栈团队协作管理系统**，支持项目管理、任务看板、团队协作、文件共享和数据统计。前后端分离架构，已完成 Vercel + EdgeOne + Railway 生产部署。
+> **一个基于 Next.js 14 + Flask 的全栈团队协作管理系统**，支持项目管理、任务看板、团队协作、文件共享和数据统计。前后端分离架构，已完成 Railway 生产部署。
 
 ## 在线演示
 
 | 环境 | 地址 | 状态 |
 |------|------|------|
-| EdgeOne（国内） | [https://team-collab-platform-ccmx19m5.edgeone.cool](https://team-collab-platform-ccmx19m5.edgeone.cool) | ✅ 在线 |
-| Vercel（境外） | [https://team-collab-platform-7thc.vercel.app](https://team-collab-platform-7thc.vercel.app) | ✅ 在线 |
-| 后端 API | [https://team-collab-platform-production.up.railway.app](https://team-collab-platform-production.up.railway.app) | ✅ 在线 |
+| 前端 | [https://powerful-growth-production-77f2.up.railway.app](https://powerful-growth-production-77f2.up.railway.app) | ✅ 在线 |
+| 后端 API | [https://powerful-growth-production-77f2.up.railway.app](https://powerful-growth-production-77f2.up.railway.app) | ✅ 在线 |
 
 ## 技术栈
 
@@ -24,7 +23,7 @@
 | 认证 | Flask-JWT-Extended | 4.6.0 | Access Token(1h) + Refresh Token(30d) |
 | 密码加密 | bcrypt | 4.2.0 | 密码哈希存储 |
 | 跨域 | Flask-CORS | 5.0.0 | 支持多域名白名单 |
-| 部署 | Vercel + EdgeOne + Railway | - | 前端双节点 + 后端云部署 |
+| 部署 | Railway | - | 前后端统一部署 |
 | WSGI | Gunicorn | 22.0.0 | 生产级 Python WSGI 服务器 |
 
 ## 功能模块
@@ -242,40 +241,14 @@ cp .env.example .env.local
 ### 当前部署架构
 
 ```
-用户浏览器
-    ├── 国内用户 → EdgeOne Pages (CDN加速) → 前端静态资源
-    └── 境外用户 → Vercel (Edge部署) → 前端静态资源
-                    ↓ API请求
-              Railway (Flask + Gunicorn)
+用户浏览器 → Railway (Next.js 前端 + Flask 后端)
                     ↓
               SQLite 数据库 + 本地文件存储
 ```
 
 | 组件 | 平台 | 地址 |
 |------|------|------|
-| 前端（国内） | EdgeOne Pages | `https://team-collab-platform-ccmx19m5.edgeone.cool` |
-| 前端（境外） | Vercel | `https://team-collab-platform-7thc.vercel.app` |
-| 后端 | Railway | `https://team-collab-platform-production.up.railway.app` |
-
-### 前端部署（Vercel）
-
-1. 访问 [vercel.com](https://vercel.com)，导入 GitHub 仓库
-2. Framework 选择 **Next.js**
-3. 环境变量：
-   ```
-   NEXT_PUBLIC_API_URL=https://your-backend-url.com
-   ```
-4. 点击 Deploy，自动完成构建与部署
-
-### 前端部署（EdgeOne Pages - 国内加速）
-
-1. 访问 EdgeOne Pages 控制台，导入 GitHub 仓库
-2. 框架自动识别为 Next.js
-3. 添加环境变量：
-   ```
-   NEXT_PUBLIC_API_URL=https://team-collab-platform-production.up.railway.app
-   ```
-4. 部署完成后获得国内可访问的 `.edgeone.cool` 域名
+| 前端 + 后端 | Railway | `https://powerful-growth-production-77f2.up.railway.app` |
 
 ### 后端部署（Railway）
 
@@ -286,7 +259,7 @@ cp .env.example .env.local
    SECRET_KEY=随机生成的高强度密钥
    JWT_SECRET_KEY=随机生成的高强度密钥
    FLASK_DEBUG=false
-   CORS_ORIGINS=https://team-collab-platform-ccmx19m5.edgeone.cool,https://team-collab-platform-7thc.vercel.app,http://localhost:3000
+   CORS_ORIGINS=https://powerful-growth-production-77f2.up.railway.app,http://localhost:3000
    ```
 4. 启动命令：`gunicorn app:app --bind 0.0.0.0:$PORT`
 5. 部署成功后，将后端地址填入前端的 `NEXT_PUBLIC_API_URL`
