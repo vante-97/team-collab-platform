@@ -68,7 +68,7 @@ POST /api/auth/register
 |------|------|------|------|
 | username | string | 是 | 用户名，至少3个字符 |
 | email | string | 是 | 邮箱地址 |
-| password | string | 是 | 密码，至少6个字符 |
+| password | string | 是 | 密码，至少8个字符 |
 
 **请求示例**：
 ```json
