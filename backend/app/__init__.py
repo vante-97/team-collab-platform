@@ -19,7 +19,12 @@ def create_app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
-    CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+    _cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+    if _cors_origins_env:
+        _cors_origins = [o.strip() for o in _cors_origins_env.split(",")]
+    else:
+        _cors_origins = ["http://localhost:3000"]
+    CORS(app, origins=_cors_origins, supports_credentials=True)
 
     db.init_app(app)
     jwt.init_app(app)
