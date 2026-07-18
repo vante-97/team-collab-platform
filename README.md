@@ -199,9 +199,50 @@ cp .env.example .env.local
 - 密码哈希存储（werkzeug）
 - 路由保护中间件
 - API 速率限制（登录 10次/分钟，注册 5次/分钟）
-- 文件上传大小限制（50MB）
-- CORS 白名单
-- Token 不暴露在 URL 中
+- 文件上传类型白名单 + 大小限制（50MB）
+- 文件名安全过滤，防止路径遍历攻击
+- 生产环境密钥通过环境变量配置，不硬编码
+- Debug 模式由 `FLASK_DEBUG` 环境变量控制
+- CORS 跨域支持环境变量配置
+
+## 部署指南
+
+### 部署架构
+
+- **前端**: Vercel（Next.js 静态导出 + Edge 部署）
+- **后端**: Railway / Render（Flask + Gunicorn）
+- **数据库**: SQLite（开发）/ PostgreSQL（生产，可选）
+- **文件存储**: 本地文件系统（生产可接 AWS S3 / 云存储）
+
+### 前端部署（Vercel）
+
+1. 访问 [vercel.com](https://vercel.com)，导入 GitHub 仓库
+2. Framework 选择 **Next.js**
+3. 环境变量：
+   ```
+   NEXT_PUBLIC_API_URL=https://your-backend-url.com
+   ```
+4. 点击 Deploy，自动完成构建与部署
+
+### 后端部署（Railway）
+
+1. 访问 [railway.app](https://railway.app)，导入 GitHub 仓库
+2. 设置 **Root Directory = `backend`**
+3. 添加环境变量：
+   ```
+   SECRET_KEY=随机生成的高强度密钥
+   JWT_SECRET_KEY=随机生成的高强度密钥
+   FLASK_DEBUG=false
+   CORS_ORIGINS=https://your-frontend-url.vercel.app
+   ```
+4. 启动命令：`gunicorn app:app --bind 0.0.0.0:$PORT`
+5. 部署成功后，将后端地址填入 Vercel 的 `NEXT_PUBLIC_API_URL`
+
+### 生成安全密钥
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
 
 ## 界面预览
 
