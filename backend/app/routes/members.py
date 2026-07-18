@@ -23,14 +23,26 @@ def _fail(message, code=400):
                     "timestamp": datetime.utcnow().isoformat() + "Z"})
 
 
+
+
+# ---- 用户列表 ----
+@members_bp.route("/api/users", methods=["GET"])
+@jwt_required()
+def get_users():
+    users = User.query.all()
+    return _ok([u.to_dict() for u in users])
+
+
 # ---- 项目成员 ----
 @members_bp.route("/api/projects/<int:project_id>/members", methods=["GET", "POST"])
 @jwt_required()
 def project_members(project_id):
     user_id = int(get_jwt_identity())
     proj = Project.query.get(project_id)
+
     if not proj:
         return _fail("项目不存在", 404)
+
 
     if request.method == "GET":
         members = TeamMember.query.filter_by(project_id=project_id).all()

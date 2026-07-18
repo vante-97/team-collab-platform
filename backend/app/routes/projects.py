@@ -6,6 +6,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.extensions import db
 from app.models.project import Project
+from app.models.team_member import TeamMember
+
 
 projects_bp = Blueprint("projects", __name__)
 
@@ -24,14 +26,13 @@ def _err(message, code=400):
     })
 
 
-def _get_project_or_404(project_id, user_id):
-    """获取项目并校验所有权"""
+def _get_project_or_404(project_id):
+    """获取项目"""
     project = db.session.get(Project, project_id)
     if not project:
         return None, _err("项目不存在", code=404)
-    if project.owner_id != user_id:
-        return None, _err("无权操作此项目", code=403)
     return project, None
+
 
 
 # ---- POST /api/projects ----
@@ -63,7 +64,13 @@ def create_project():
         db.session.add(project)
         db.session.commit()
 
+        # 创建者自动加入项目，成为 owner
+        membership = TeamMember(user_id=user_id, project_id=project.id, role="owner")
+        db.session.add(membership)
+        db.session.commit()
+
         return _ok(data=project.to_dict(), message="项目创建成功", code=201)
+
     except Exception as e:
         db.session.rollback()
         return _err(str(e), code=500)
@@ -77,7 +84,11 @@ def list_projects():
         user_id = int(get_jwt_identity())
         search = request.args.get("search", "").strip()
 
-        query = Project.query.filter_by(owner_id=user_id)
+        member_project_ids = [m.project_id for m in TeamMember.query.filter_by(user_id=user_id).all()]
+        if not member_project_ids:
+            return _ok(data=[])
+
+        query = Project.query.filter(Project.id.in_(member_project_ids))
         if search:
             query = query.filter(Project.name.contains(search))
 
@@ -87,13 +98,13 @@ def list_projects():
         return _err(str(e), code=500)
 
 
+
 # ---- GET /api/projects/<int:id> ----
 @projects_bp.route("/<int:id>", methods=["GET"])
 @jwt_required()
 def get_project(id):
     try:
-        user_id = int(get_jwt_identity())
-        project, error = _get_project_or_404(id, user_id)
+        project, error = _get_project_or_404(id)
         if error:
             return error
         return _ok(data=project.to_dict())
@@ -106,8 +117,7 @@ def get_project(id):
 @jwt_required()
 def update_project(id):
     try:
-        user_id = int(get_jwt_identity())
-        project, error = _get_project_or_404(id, user_id)
+        project, error = _get_project_or_404(id)
         if error:
             return error
 
@@ -145,8 +155,7 @@ def update_project(id):
 @jwt_required()
 def delete_project(id):
     try:
-        user_id = int(get_jwt_identity())
-        project, error = _get_project_or_404(id, user_id)
+        project, error = _get_project_or_404(id)
         if error:
             return error
 
@@ -156,3 +165,4 @@ def delete_project(id):
     except Exception as e:
         db.session.rollback()
         return _err(str(e), code=500)
+

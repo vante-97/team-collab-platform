@@ -78,11 +78,14 @@ def create_app():
     from app.routes.tasks import tasks_bp
     from app.routes.members import members_bp
     from app.routes.files import files_bp
+    from app.routes.stats import stats_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(projects_bp, url_prefix="/api/projects")
     app.register_blueprint(tasks_bp)
     app.register_blueprint(members_bp)
     app.register_blueprint(files_bp)
+    app.register_blueprint(stats_bp)
+
 
     @app.route("/")
     def home():
@@ -100,5 +103,16 @@ def create_app():
     with app.app_context():
         from app.models import User, Project, Task, TeamMember, Invitation, ProjectFile  # noqa
         db.create_all()
+
+        # 数据迁移：确保每个项目都有 owner 成员关系（兼容旧数据库）
+        try:
+            projects = Project.query.all()
+            for proj in projects:
+                existing = TeamMember.query.filter_by(user_id=proj.owner_id, project_id=proj.id).first()
+                if not existing:
+                    db.session.add(TeamMember(user_id=proj.owner_id, project_id=proj.id, role="owner"))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
     return app
